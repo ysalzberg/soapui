@@ -3,6 +3,7 @@ package com.eviware.soapui.impl.rest.panels.request;
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.utils.FestMatchers;
 import org.fest.swing.core.BasicRobot;
+import org.fest.swing.core.KeyPressInfo;
 import org.fest.swing.core.Robot;
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.fixture.*;
@@ -157,6 +158,7 @@ public class SynchParametersTest
 	}
 
 	private void addNewParameter( JPanelFixture parentPanel, String paramName, String paramValue )
+			throws InterruptedException
 	{
 		parentPanel.button( ADD_PARAM_ACTION_NAME ).click();
 		JTableFixture restParamsTable = parentPanel.table( REST_PARAMS_TABLE );
@@ -164,6 +166,7 @@ public class SynchParametersTest
 		robot.waitForIdle();
 		int rowNumToEdit = restParamsTable.target.getRowCount() - 1;
 		editTableCell( paramName, restParamsTable, rowNumToEdit, 0 );
+		Thread.sleep( 200 );
 		editTableCell( paramValue, restParamsTable, rowNumToEdit, 1 );
 		robot.waitForIdle();
 	}
@@ -174,7 +177,7 @@ public class SynchParametersTest
 		JTextField tableCellEditor = ( JTextField )restParamsTable.cell( row( rowNumToEdit ).column( column ) ).editor();
 		new JTextComponentFixture( robot, tableCellEditor )
 				.enterText( paramValue )
-				.pressKey( KeyEvent.VK_ENTER );
+				.pressAndReleaseKey( KeyPressInfo.keyCode(KeyEvent.VK_ENTER ));
 	}
 
 	private void changeParameterLevel( JPanelFixture parentPanel, int rownum, ParamLocation newLocation )
