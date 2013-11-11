@@ -67,6 +67,7 @@ public class SynchParametersTest
 	@Before
 	public void setUp()
 	{
+		System.setProperty( "soapui.jxbrowser.disable", "true" );
 		application( SoapUI.class ).start();
 		robot = BasicRobot.robotWithCurrentAwtHierarchy();
 	}
@@ -75,7 +76,6 @@ public class SynchParametersTest
 	public void testParameterSync() throws InterruptedException
 	{
 		FrameFixture rootWindow = frameWithTitle( "SoapUI" ).using( robot );
-		rootWindow.maximize();
 
 		createNewRestProject( rootWindow );
 
@@ -87,7 +87,7 @@ public class SynchParametersTest
 		verifyParamValues( requestEditor, 0, "Address", "Stockholm" );
 		verifyParamValues( resourceEditor, 0, "Address", "" );
 
-		openResourceEditor( rootWindow );
+		resourceEditor = openResourceEditor( rootWindow );
 
 		addNewParameter( resourceEditor, "resParam", "value1" );
 		verifyParamValues( resourceEditor, 1, "resParam", "value1" );
