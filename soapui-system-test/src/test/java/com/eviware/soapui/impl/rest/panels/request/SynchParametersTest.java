@@ -119,7 +119,6 @@ public class SynchParametersTest
 
 	private void closeWindow( FrameFixture rootWindow ) throws InterruptedException
 	{
-		Thread.sleep( 2000 );
 		rootWindow.close();
 
 		DialogFixture confirmationDialog = FestMatchers.dialogWithTitle( "Question" ).using( robot );
@@ -164,6 +163,7 @@ public class SynchParametersTest
 		int rowNumToEdit = restParamsTable.target.getRowCount() - 1;
 		editTableCell( paramName, restParamsTable, rowNumToEdit, 0 );
 		editTableCell( paramValue, restParamsTable, rowNumToEdit, 1 );
+		robot.waitForIdle();
 	}
 
 	private void editTableCell( String paramValue, JTableFixture restParamsTable, int rowNumToEdit, int column )
