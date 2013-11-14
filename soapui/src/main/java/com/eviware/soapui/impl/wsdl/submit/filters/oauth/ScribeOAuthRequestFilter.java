@@ -4,6 +4,8 @@ import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.wsdl.submit.filters.AbstractRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.BaseHttpRequestTransport;
+import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedGetMethod;
+import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedPostMethod;
 import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.support.ModelSupport;
@@ -29,6 +31,8 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 {
 
 	public static final String CALLBACK_URL = "http://localhost:8080";
+	public static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
+	public static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
 
 	private Token accessToken;
 
@@ -38,8 +42,8 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 		try
 		{
 			Project project = ModelSupport.getModelItemProject( request );
-			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
-			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
+			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_KEY );
+			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
 
 			OAuthService service = new ServiceBuilder()
 					.provider( TwitterApi.class ) // existing classes for common oauth providers
@@ -80,7 +84,23 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 	private void signRequest( OAuthService service, Token accessToken, SubmitContext context )
 	{
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
-		OAuthRequest oAuthRequest = new OAuthRequest( Verb.GET, httpRequest.getRequestLine().getUri() );
+
+		Verb verb;
+		if( httpRequest instanceof ExtendedPostMethod )
+		{
+			verb = Verb.POST;
+
+		}
+		else if( httpRequest instanceof ExtendedGetMethod )
+		{
+			verb = Verb.GET;
+		}
+		else
+		{
+			throw new IllegalArgumentException( "Only GET and POST implemented yet" );
+		}
+
+		OAuthRequest oAuthRequest = new OAuthRequest( verb, httpRequest.getRequestLine().getUri() );
 		service.signRequest( accessToken, oAuthRequest );
 
 		Map<String, String> headers = oAuthRequest.getHeaders();

@@ -18,6 +18,9 @@ import java.util.Map;
 
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.wsdl.submit.filters.*;
+import com.eviware.soapui.impl.wsdl.submit.filters.oauth.OltuOAuthRequestFilter;
+import com.eviware.soapui.impl.wsdl.submit.filters.oauth.ScribeOAuthRequestFilter;
+import com.eviware.soapui.impl.wsdl.submit.filters.oauth.SignpostPreAuthorizedOauthRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.filters.oauth.SingpostOAuthRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.HttpClientRequestTransport;
 import com.eviware.soapui.impl.wsdl.submit.transports.jms.HermesJmsRequestTransport;
@@ -61,7 +64,10 @@ public class RequestTransportRegistry
 		httpTransport.addRequestFilter( new WsrmRequestFilter() );
 		httpTransport.addRequestFilter( new WssRequestFilter() );
 
-		httpTransport.addRequestFilter( new SingpostOAuthRequestFilter() );
+//		httpTransport.addRequestFilter( new SingpostOAuthRequestFilter() );
+//		httpTransport.addRequestFilter( new ScribeOAuthRequestFilter() );
+		httpTransport.addRequestFilter( new OltuOAuthRequestFilter() );
+//		httpTransport.addRequestFilter( new SignpostPreAuthorizedOauthRequestFilter() );
 
 		for( RequestFilter filter : SoapUI.getListenerRegistry().getListeners( RequestFilter.class ) )
 		{

@@ -28,11 +28,10 @@ import java.util.Map;
 
 /**
  * OAuth 2.0 three-legged flow for Facebook (https://github.com/Mashape/mashape-oauth/blob/master/FLOWS.md#oauth-2-three-legged).
- *
  * 1. If no existing access token, user is sent to facebook for authorization
- * 	1a. User logs in to facebook and grants access to the application
- * 	1b. Use is redirected back to CALLBACK_URL with the authorization code
- * 	1c. The authorization code is exchanged for an access token
+ * 1a. User logs in to facebook and grants access to the application
+ * 1b. User is redirected back to CALLBACK_URL with the authorization code as a query parameter
+ * 1c. The authorization code is exchanged for an access token
  * 2. The access token is used to sign the request
  *
  * @author Anders Jaensson
@@ -40,10 +39,12 @@ import java.util.Map;
 public class OltuOAuthRequestFilter extends AbstractRequestFilter
 {
 
+	private static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
+	private static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
+	private static final OAuthProviderType provider = OAuthProviderType.FACEBOOK;
 	public static final String CALLBACK_URL = "http://localhost:8080/";
 
 	private String accessToken;
-
 
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
@@ -52,11 +53,12 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		try
 		{
 			Project project = ModelSupport.getModelItemProject( request );
-			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
-			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
+			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_KEY );
+			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
 
 			// Authorize
-			if ( StringUtils.isNullOrEmpty( accessToken )){
+			if( StringUtils.isNullOrEmpty( accessToken ) )
+			{
 				String authorizationCode = authorize( oauthConsumerKey );
 
 				// get access token
@@ -82,7 +84,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
-				.tokenProvider( OAuthProviderType.FACEBOOK )
+				.tokenProvider( provider )
 				.setGrantType( GrantType.AUTHORIZATION_CODE )
 				.setClientId( oauthConsumerKey )
 				.setClientSecret( oauthConsumerSecret )
@@ -103,7 +105,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	private String createAuthUrl( String oauthConsumerKey ) throws OAuthSystemException
 	{
 		return OAuthClientRequest
-				.authorizationProvider( OAuthProviderType.FACEBOOK )
+				.authorizationProvider( provider )
 				.setClientId( oauthConsumerKey )
 				.setRedirectURI( CALLBACK_URL )
 				.buildQueryMessage().getLocationUri();

@@ -42,7 +42,9 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 			"https://api.twitter.com/oauth/access_token",
 			"https://api.twitter.com/oauth/authorize" );
 
-	public static final String CALLBACK_URL = "http://localhost:8080";
+	private static final String CALLBACK_URL = "http://localhost:8080";
+	public static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
+	public static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
 
 	private String accessToken;
 	private String accessTokenSecret;
@@ -76,8 +78,8 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 		Project project = ModelSupport.getModelItemProject( request );
 
 		// initialize OAuth consumer
-		String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
-		String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
+		String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_KEY );
+		String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
 
 		return new CommonsHttpOAuthConsumer(
 				oauthConsumerKey,
