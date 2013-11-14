@@ -74,13 +74,13 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		}
 	}
 
-	private String authorize( String oauthConsumerKey ) throws OAuthSystemException, IOException
+	private String authorize( String oauthConsumerKey ) throws Exception
 	{
 		String authUrl = createAuthUrl( oauthConsumerKey );
 		return askUserForCode( authUrl );
 	}
 
-	private String retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws OAuthSystemException, OAuthProblemException
+	private String retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws Exception
 	{
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
@@ -94,15 +94,15 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 		OAuthClient oAuthClient = new OAuthClient( new HttpClient4( HttpClientSupport.getHttpClient() ) );
 
+		// facebook and github do not return json and have their own response handlers
 		GitHubTokenResponse accessTokenResponse = oAuthClient.accessToken( accessTokenRequest, GitHubTokenResponse.class );
 
-		// The access token should be stored somewhere and used until it expires
 		String accessToken = accessTokenResponse.getAccessToken();
 		SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, accessTokenResponse.getExpiresIn() ) );
 		return accessToken;
 	}
 
-	private String createAuthUrl( String oauthConsumerKey ) throws OAuthSystemException
+	private String createAuthUrl( String oauthConsumerKey ) throws Exception
 	{
 		return OAuthClientRequest
 				.authorizationProvider( provider )
@@ -111,7 +111,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 				.buildQueryMessage().getLocationUri();
 	}
 
-	private void signRequest( String accessToken, SubmitContext context ) throws OAuthSystemException
+	private void signRequest( String accessToken, SubmitContext context ) throws Exception
 	{
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 		String uri = httpRequest.getRequestLine().getUri();

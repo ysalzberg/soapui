@@ -12,6 +12,7 @@ import com.eviware.soapui.model.support.ModelSupport;
 import com.eviware.soapui.support.UISupport;
 import org.apache.http.HttpRequest;
 import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
@@ -33,6 +34,7 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 	public static final String CALLBACK_URL = "http://localhost:8080";
 	public static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
 	public static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
+	private static final Class<? extends Api> provider = TwitterApi.class;
 
 	private Token accessToken;
 
@@ -46,7 +48,7 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
 
 			OAuthService service = new ServiceBuilder()
-					.provider( TwitterApi.class ) // existing classes for common oauth providers
+					.provider( provider ) // existing classes for common oauth providers
 					.apiKey( oauthConsumerKey )
 					.apiSecret( oauthConsumerSecret )
 					.callback( CALLBACK_URL )

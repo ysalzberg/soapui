@@ -25,12 +25,11 @@ import java.net.URI;
 
 /**
  * OAuth 1.0a three-legged flow for twitter (https://github.com/Mashape/mashape-oauth/blob/master/FLOWS.md#oauth-10a-three-legged).
- *
  * 1. If no existing access token and access token secret, application retrieves a request token
- * 	1a. The request token contains a url to which the user is redirected
- * 	1b. The user grants access to the application
- * 	1c. User is redirected back with request token and verifier
- * 	1d. Request token and verifier and exchanged for an access token and access token secret
+ * 1a. The request token contains a url to which the user is redirected
+ * 1b. The user grants access to the application
+ * 1c. User is redirected back with request token and verifier
+ * 1d. Request token and verifier and exchanged for an access token and access token secret
  * 2. The access token and the access token secret are used to sign requests
  *
  * @author Anders Jaensson
@@ -91,20 +90,20 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 		consumer.setTokenWithSecret( accessToken, accessTokenSecret );
 	}
 
-	private void rememberAccessToken( OAuthConsumer consumer ) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException, IOException
+	private void rememberAccessToken( OAuthConsumer consumer ) throws Exception
 	{
 		accessToken = consumer.getToken();
 		accessTokenSecret = consumer.getTokenSecret();
 	}
 
-	private void retrieveAccessToken( OAuthConsumer consumer, OAuthProvider provider ) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException, IOException
+	private void retrieveAccessToken( OAuthConsumer consumer, OAuthProvider provider ) throws Exception
 	{
 		String authUrl = provider.retrieveRequestToken( consumer, CALLBACK_URL );
 		String code = askUserForCode( authUrl );
 		provider.retrieveAccessToken( consumer, code );
 	}
 
-	private void signRequest( SubmitContext context, OAuthConsumer consumer ) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException
+	private void signRequest( SubmitContext context, OAuthConsumer consumer ) throws Exception
 	{
 		// sign the request
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
