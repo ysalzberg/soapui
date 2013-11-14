@@ -1,7 +1,8 @@
-package com.eviware.soapui.impl.wsdl.submit.filters;
+package com.eviware.soapui.impl.wsdl.submit.filters.oauth;
 
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
+import com.eviware.soapui.impl.wsdl.submit.filters.AbstractRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.BaseHttpRequestTransport;
 import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
@@ -16,7 +17,7 @@ import org.apache.http.HttpRequest;
 /**
  * @author Anders Jaensson
  */
-public class OauthRequestProvidedAccessTokenFilter extends AbstractRequestFilter
+public class SignpostPreAuthorizedOauthRequestFilter extends AbstractRequestFilter
 {
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
@@ -38,15 +39,7 @@ public class OauthRequestProvidedAccessTokenFilter extends AbstractRequestFilter
 			// sign the request
 			consumer.sign( httpRequest );
 		}
-		catch( OAuthMessageSignerException e )
-		{
-			SoapUI.logError( e );
-		}
-		catch( OAuthExpectationFailedException e )
-		{
-			SoapUI.logError( e );
-		}
-		catch( OAuthCommunicationException e )
+		catch( Exception e )
 		{
 			SoapUI.logError( e );
 		}

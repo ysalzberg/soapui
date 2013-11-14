@@ -18,6 +18,7 @@ import java.util.Map;
 
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.wsdl.submit.filters.*;
+import com.eviware.soapui.impl.wsdl.submit.filters.oauth.SingpostOAuthRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.HttpClientRequestTransport;
 import com.eviware.soapui.impl.wsdl.submit.transports.jms.HermesJmsRequestTransport;
 import com.eviware.soapui.model.iface.SubmitContext;
@@ -60,7 +61,7 @@ public class RequestTransportRegistry
 		httpTransport.addRequestFilter( new WsrmRequestFilter() );
 		httpTransport.addRequestFilter( new WssRequestFilter() );
 
-		httpTransport.addRequestFilter( new OauthRequestFilter() );
+		httpTransport.addRequestFilter( new SingpostOAuthRequestFilter() );
 
 		for( RequestFilter filter : SoapUI.getListenerRegistry().getListeners( RequestFilter.class ) )
 		{
