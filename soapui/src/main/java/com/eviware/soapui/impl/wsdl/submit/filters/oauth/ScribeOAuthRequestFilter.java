@@ -85,6 +85,21 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 	{
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 
+		Verb verb = getRequestType( httpRequest );
+
+		OAuthRequest oAuthRequest = new OAuthRequest( verb, httpRequest.getRequestLine().getUri() );
+		service.signRequest( accessToken, oAuthRequest );
+
+		Map<String, String> headers = oAuthRequest.getHeaders();
+
+		for( Map.Entry<String, String> stringStringEntry : headers.entrySet() )
+		{
+			httpRequest.setHeader( stringStringEntry.getKey(), stringStringEntry.getValue() );
+		}
+	}
+
+	private Verb getRequestType( HttpRequest httpRequest )
+	{
 		Verb verb;
 		if( httpRequest instanceof ExtendedPostMethod )
 		{
@@ -99,16 +114,7 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 		{
 			throw new IllegalArgumentException( "Only GET and POST implemented yet" );
 		}
-
-		OAuthRequest oAuthRequest = new OAuthRequest( verb, httpRequest.getRequestLine().getUri() );
-		service.signRequest( accessToken, oAuthRequest );
-
-		Map<String, String> headers = oAuthRequest.getHeaders();
-
-		for( Map.Entry<String, String> stringStringEntry : headers.entrySet() )
-		{
-			httpRequest.setHeader( stringStringEntry.getKey(), stringStringEntry.getValue() );
-		}
+		return verb;
 	}
 
 	private String askUserForCode( String authUrl ) throws IOException
