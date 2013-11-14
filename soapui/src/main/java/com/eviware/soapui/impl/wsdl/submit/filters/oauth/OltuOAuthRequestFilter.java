@@ -27,6 +27,14 @@ import java.net.URI;
 import java.util.Map;
 
 /**
+ * OAuth 2.0 three-legged flow for Facebook (https://github.com/Mashape/mashape-oauth/blob/master/FLOWS.md#oauth-2-three-legged).
+ *
+ * 1. If no existing access token, user is sent to facebook for authorization
+ * 	1a. User logs in to facebook and grants access to the application
+ * 	1b. Use is redirected back to CALLBACK_URL with the authorization code
+ * 	1c. The authorization code is exchanged for an access token
+ * 2. The access token is used to sign the request
+ *
  * @author Anders Jaensson
  */
 public class OltuOAuthRequestFilter extends AbstractRequestFilter

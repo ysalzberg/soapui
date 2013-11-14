@@ -94,6 +94,6 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 	private String askUserForCode( String authUrl ) throws IOException
 	{
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
-		return UISupport.getDialogs().prompt( "Enter code", "enter code" );
+		return UISupport.getDialogs().prompt( "Please enter the authorization code", "title" );
 	}
 }

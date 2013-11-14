@@ -24,6 +24,15 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
+ * OAuth 1.0a three-legged flow for twitter (https://github.com/Mashape/mashape-oauth/blob/master/FLOWS.md#oauth-10a-three-legged).
+ *
+ * 1. If no existing access token and access token secret, application retrieves a request token
+ * 	1a. The request token contains a url to which the user is redirected
+ * 	1b. The user authorizes the application
+ * 	1c. User is redirected back with request token and verifier
+ * 	1d. Request token and verifier and exchanged for an access token and access token secret
+ * 2. The access token and the access token secret are used to sign requests
+ *
  * @author Anders Jaensson
  */
 public class SingpostOAuthRequestFilter extends AbstractRequestFilter
