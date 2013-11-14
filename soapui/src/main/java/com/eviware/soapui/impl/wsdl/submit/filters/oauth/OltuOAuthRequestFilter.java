@@ -33,26 +33,29 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
 	{
-		Project project = ModelSupport.getModelItemProject( request );
 
 		try
 		{
+			Project project = ModelSupport.getModelItemProject( request );
 
 			// Authorize
+			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
+
 			OAuthClientRequest r = OAuthClientRequest
 					.authorizationProvider( OAuthProviderType.FACEBOOK )
-					.setClientId( project.getPropertyValue( "oauth_consumer_key" ) )
+					.setClientId( oauthConsumerKey )
 					.setRedirectURI( "http://localhost:8080/" )
 					.buildQueryMessage();
 
 			String code = askUserForCode( r.getLocationUri() );
 
 			// exchange authorization code for access token
+			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
 			r = OAuthClientRequest
 					.tokenProvider( OAuthProviderType.FACEBOOK )
 					.setGrantType( GrantType.AUTHORIZATION_CODE )
-					.setClientId( project.getPropertyValue( "oauth_consumer_key" ) )
-					.setClientSecret( project.getPropertyValue( "oauth_consumer_secret" ) )
+					.setClientId( oauthConsumerKey )
+					.setClientSecret( oauthConsumerSecret )
 					.setRedirectURI( "http://localhost:8080/" )
 					.setCode( code )
 					.buildBodyMessage();

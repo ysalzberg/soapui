@@ -33,28 +33,26 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 			"https://api.twitter.com/oauth/access_token",
 			"https://api.twitter.com/oauth/authorize" );
 
-	private String tokenSecret;
-	private String token;
+	public static final String CALLBACK_URL = "http://localhost:8080";
+
+	private String accessToken;
+	private String accessTokenSecret;
 
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
 	{
 		try
 		{
-			Project project = ModelSupport.getModelItemProject( request );
+			OAuthConsumer consumer = createOAuthConsumer( request );
 
-			// initialize OAuth consumer
-			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(
-					project.getPropertyValue( "oauth_consumer_key" ),
-					project.getPropertyValue( "oauth_consumer_secret" ) );
-
-			if( StringUtils.isNullOrEmpty( token ) || StringUtils.isNullOrEmpty( tokenSecret ) )
+			if( StringUtils.isNullOrEmpty( accessToken ) || StringUtils.isNullOrEmpty( accessTokenSecret ) )
 			{
-				storeToken( consumer, twitterOAuthProvider );
+				retrieveAccessToken( consumer, twitterOAuthProvider );
+				rememberAccessToken( consumer );
 			}
 			else
 			{
-				useStoredToken( consumer );
+				useStoredAccessToken( consumer );
 			}
 			signRequest( context, consumer );
 		}
@@ -64,22 +62,33 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 		}
 	}
 
-	private void useStoredToken( OAuthConsumer consumer )
+	private OAuthConsumer createOAuthConsumer( RestRequestInterface request )
 	{
-		consumer.setTokenWithSecret( token, tokenSecret );
+		Project project = ModelSupport.getModelItemProject( request );
+
+		// initialize OAuth consumer
+		String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
+		String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
+
+		return new CommonsHttpOAuthConsumer(
+				oauthConsumerKey,
+				oauthConsumerSecret );
 	}
 
-	private void storeToken( OAuthConsumer consumer, OAuthProvider provider ) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException, IOException
+	private void useStoredAccessToken( OAuthConsumer consumer )
 	{
-		retrieveAccessToken( consumer, provider );
+		consumer.setTokenWithSecret( accessToken, accessTokenSecret );
+	}
 
-		token = consumer.getToken();
-		tokenSecret = consumer.getTokenSecret();
+	private void rememberAccessToken( OAuthConsumer consumer ) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException, IOException
+	{
+		accessToken = consumer.getToken();
+		accessTokenSecret = consumer.getTokenSecret();
 	}
 
 	private void retrieveAccessToken( OAuthConsumer consumer, OAuthProvider provider ) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException, IOException
 	{
-		String authUrl = provider.retrieveRequestToken( consumer, "http://localhost:8080" );
+		String authUrl = provider.retrieveRequestToken( consumer, CALLBACK_URL );
 		String code = askUserForCode( authUrl );
 		provider.retrieveAccessToken( consumer, code );
 	}
