@@ -28,7 +28,7 @@ import java.net.URI;
  *
  * 1. If no existing access token and access token secret, application retrieves a request token
  * 	1a. The request token contains a url to which the user is redirected
- * 	1b. The user authorizes the application
+ * 	1b. The user grants access to the application
  * 	1c. User is redirected back with request token and verifier
  * 	1d. Request token and verifier and exchanged for an access token and access token secret
  * 2. The access token and the access token secret are used to sign requests
