@@ -8,6 +8,7 @@ import com.eviware.soapui.impl.wsdl.support.http.HttpClientSupport;
 import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.support.ModelSupport;
+import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import org.apache.http.HttpRequest;
 import org.apache.oltu.oauth2.client.OAuthClient;
@@ -15,6 +16,7 @@ import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
 import org.apache.oltu.oauth2.client.response.GitHubTokenResponse;
 import org.apache.oltu.oauth2.common.OAuthProviderType;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.apache.oltu.oauth2.httpclient4.HttpClient4;
@@ -30,6 +32,11 @@ import java.util.Map;
 public class OltuOAuthRequestFilter extends AbstractRequestFilter
 {
 
+	public static final String CALLBACK_URL = "http://localhost:8080/";
+
+	private String accessToken;
+
+
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
 	{
@@ -37,40 +44,19 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		try
 		{
 			Project project = ModelSupport.getModelItemProject( request );
+			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
+			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
 
 			// Authorize
-			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
+			if ( StringUtils.isNullOrEmpty( accessToken )){
+				String authorizationCode = authorize( oauthConsumerKey );
 
-			OAuthClientRequest r = OAuthClientRequest
-					.authorizationProvider( OAuthProviderType.FACEBOOK )
-					.setClientId( oauthConsumerKey )
-					.setRedirectURI( "http://localhost:8080/" )
-					.buildQueryMessage();
+				// get access token
+				accessToken = retrieveAccessToken( oauthConsumerKey, oauthConsumerSecret, authorizationCode );
+			}
 
-			String code = askUserForCode( r.getLocationUri() );
-
-			// exchange authorization code for access token
-			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
-			r = OAuthClientRequest
-					.tokenProvider( OAuthProviderType.FACEBOOK )
-					.setGrantType( GrantType.AUTHORIZATION_CODE )
-					.setClientId( oauthConsumerKey )
-					.setClientSecret( oauthConsumerSecret )
-					.setRedirectURI( "http://localhost:8080/" )
-					.setCode( code )
-					.buildBodyMessage();
-
-			OAuthClient oAuthClient = new OAuthClient( new HttpClient4( HttpClientSupport.getHttpClient() ) );
-
-			GitHubTokenResponse oAuthResponse = oAuthClient.accessToken( r, GitHubTokenResponse.class );
-
-			// The access token should be stored somewhere and used until it expires
-			String accessToken = oAuthResponse.getAccessToken();
-			SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, oAuthResponse.getExpiresIn() ) );
-
-			// sign the request using the access token. No real support for httpclient
-			HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
-			applyOauthHeaders( accessToken, httpRequest );
+			// sign the request using the access token
+			signRequest( accessToken, context );
 		}
 		catch( Exception e )
 		{
@@ -78,8 +64,46 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		}
 	}
 
-	private void applyOauthHeaders( String accessToken, HttpRequest httpRequest ) throws OAuthSystemException
+	private String authorize( String oauthConsumerKey ) throws OAuthSystemException, IOException
 	{
+		String authUrl = createAuthUrl( oauthConsumerKey );
+		return askUserForCode( authUrl );
+	}
+
+	private String retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws OAuthSystemException, OAuthProblemException
+	{
+
+		OAuthClientRequest accessTokenRequest = OAuthClientRequest
+				.tokenProvider( OAuthProviderType.FACEBOOK )
+				.setGrantType( GrantType.AUTHORIZATION_CODE )
+				.setClientId( oauthConsumerKey )
+				.setClientSecret( oauthConsumerSecret )
+				.setRedirectURI( CALLBACK_URL )
+				.setCode( code )
+				.buildBodyMessage();
+
+		OAuthClient oAuthClient = new OAuthClient( new HttpClient4( HttpClientSupport.getHttpClient() ) );
+
+		GitHubTokenResponse accessTokenResponse = oAuthClient.accessToken( accessTokenRequest, GitHubTokenResponse.class );
+
+		// The access token should be stored somewhere and used until it expires
+		String accessToken = accessTokenResponse.getAccessToken();
+		SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, accessTokenResponse.getExpiresIn() ) );
+		return accessToken;
+	}
+
+	private String createAuthUrl( String oauthConsumerKey ) throws OAuthSystemException
+	{
+		return OAuthClientRequest
+				.authorizationProvider( OAuthProviderType.FACEBOOK )
+				.setClientId( oauthConsumerKey )
+				.setRedirectURI( CALLBACK_URL )
+				.buildQueryMessage().getLocationUri();
+	}
+
+	private void signRequest( String accessToken, SubmitContext context ) throws OAuthSystemException
+	{
+		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 		String uri = httpRequest.getRequestLine().getUri();
 		OAuthClientRequest req = new OAuthBearerClientRequest( uri ).setAccessToken( accessToken ).buildHeaderMessage();
 
@@ -94,6 +118,6 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	private String askUserForCode( String authUrl ) throws IOException
 	{
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
-		return UISupport.getDialogs().prompt( "Enter code", "enter code" );
+		return UISupport.getDialogs().prompt( "Please enter the authorization code", "title" );
 	}
 }

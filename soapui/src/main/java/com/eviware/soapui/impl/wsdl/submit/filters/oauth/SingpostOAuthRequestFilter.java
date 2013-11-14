@@ -103,6 +103,6 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 	private String askUserForCode( String authUrl ) throws IOException
 	{
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
-		return UISupport.getDialogs().prompt( "Please enter the code", "title" );
+		return UISupport.getDialogs().prompt( "Please enter the authorization code", "title" );
 	}
 }
