@@ -28,33 +28,35 @@ import java.util.Map;
 public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 {
 
+	public static final String CALLBACK_URL = "http://localhost:8080";
+
+	private Token accessToken;
+
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
 	{
 		try
 		{
 			Project project = ModelSupport.getModelItemProject( request );
+			String oauthConsumerKey = project.getPropertyValue( "oauth_consumer_key" );
+			String oauthConsumerSecret = project.getPropertyValue( "oauth_consumer_secret" );
 
 			OAuthService service = new ServiceBuilder()
-					.provider( TwitterApi.class ) // FIXME: existing classes for common auth providers
-					.apiKey( project.getPropertyValue( "oauth_consumer_key" ) )
-					.apiSecret( project.getPropertyValue( "oauth_consumer_secret" ) )
-					.callback( "http://localhost:8080" )
+					.provider( TwitterApi.class ) // existing classes for common oauth providers
+					.apiKey( oauthConsumerKey )
+					.apiSecret( oauthConsumerSecret )
+					.callback( CALLBACK_URL )
 					.build();
 
-			Token requestToken = service.getRequestToken();
+			if( accessToken == null )
+			{
+				Token requestToken = service.getRequestToken();
+				String authorizationCode = authorize( service, requestToken );
+				accessToken = retrieveAccessToken( service, requestToken, authorizationCode );
+			}
 
-			String authUrl = service.getAuthorizationUrl( requestToken );
-
-			String code = askUserForCode( authUrl );
-
-			Verifier v = new Verifier( code );
-			Token accessToken = service.getAccessToken( requestToken, v );
-
-			// FIXME: no built in support for http client.
-			HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
-
-			applyOauthHeaders( service, accessToken, httpRequest );
+			//  no built in support for http client.
+			signRequest( service, accessToken, context );
 
 		}
 		catch( Exception e )
@@ -63,9 +65,21 @@ public class ScribeOAuthRequestFilter extends AbstractRequestFilter
 		}
 	}
 
-
-	private void applyOauthHeaders( OAuthService service, Token accessToken, HttpRequest httpRequest )
+	private Token retrieveAccessToken( OAuthService service, Token requestToken, String authorizationCode ) throws IOException
 	{
+		return service.getAccessToken( requestToken, new Verifier( authorizationCode ) );
+	}
+
+	private String authorize( OAuthService service, Token requestToken ) throws IOException
+	{
+		String authUrl = service.getAuthorizationUrl( requestToken );
+		return askUserForCode( authUrl );
+	}
+
+
+	private void signRequest( OAuthService service, Token accessToken, SubmitContext context )
+	{
+		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 		OAuthRequest oAuthRequest = new OAuthRequest( Verb.GET, httpRequest.getRequestLine().getUri() );
 		service.signRequest( accessToken, oAuthRequest );
 
