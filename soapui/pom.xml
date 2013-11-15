@@ -657,6 +657,11 @@
             <artifactId>org.apache.oltu.oauth2.httpclient4</artifactId>
             <version>0.31</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.17.0-rc</version>
+        </dependency>
         <!-- TODO Not sure if thease are needed -->
 
         <dependency>

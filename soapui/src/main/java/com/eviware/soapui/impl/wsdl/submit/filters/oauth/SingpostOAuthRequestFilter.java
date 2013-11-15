@@ -4,6 +4,7 @@ import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.wsdl.submit.filters.AbstractRequestFilter;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.BaseHttpRequestTransport;
+import com.eviware.soapui.impl.wsdl.support.http.HttpClientSupport;
 import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.support.ModelSupport;
@@ -39,7 +40,8 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 	private static final CommonsHttpOAuthProvider twitterOAuthProvider = new CommonsHttpOAuthProvider(
 			"https://api.twitter.com/oauth/request_token",
 			"https://api.twitter.com/oauth/access_token",
-			"https://api.twitter.com/oauth/authorize" );
+			"https://api.twitter.com/oauth/authorize",
+			HttpClientSupport.getHttpClient() );
 
 	private static final String CALLBACK_URL = "http://localhost:8080";
 	public static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
@@ -57,7 +59,7 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 
 			if( StringUtils.isNullOrEmpty( accessToken ) || StringUtils.isNullOrEmpty( accessTokenSecret ) )
 			{
-				retrieveAccessToken( consumer, twitterOAuthProvider );
+				retrieveAccessToken( consumer, twitterOAuthProvider);
 				rememberAccessToken( consumer );
 			}
 			else

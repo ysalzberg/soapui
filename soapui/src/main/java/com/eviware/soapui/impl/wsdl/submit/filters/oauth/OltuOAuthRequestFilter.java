@@ -15,10 +15,11 @@ import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
 import org.apache.oltu.oauth2.client.response.GitHubTokenResponse;
+import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
+import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.oltu.oauth2.common.OAuthProviderType;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
+import org.apache.oltu.oauth2.common.token.OAuthToken;
 import org.apache.oltu.oauth2.httpclient4.HttpClient4;
 
 import java.awt.*;
@@ -41,10 +42,10 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 	private static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
 	private static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
-	private static final OAuthProviderType provider = OAuthProviderType.FACEBOOK;
+	private static final OAuthProviderType provider = OAuthProviderType.GOOGLE;
 	public static final String CALLBACK_URL = "http://localhost:8080/";
 
-	private String accessToken;
+	private OAuthToken token;
 
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
@@ -57,16 +58,16 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
 
 			// Authorize
-			if( StringUtils.isNullOrEmpty( accessToken ) )
+			if( token == null || StringUtils.isNullOrEmpty( token.getAccessToken() ) )
 			{
 				String authorizationCode = authorize( oauthConsumerKey );
 
 				// get access token
-				accessToken = retrieveAccessToken( oauthConsumerKey, oauthConsumerSecret, authorizationCode );
+				token = retrieveAccessToken( oauthConsumerKey, oauthConsumerSecret, authorizationCode );
 			}
 
 			// sign the request using the access token
-			signRequest( accessToken, context );
+			signRequest( token, context );
 		}
 		catch( Exception e )
 		{
@@ -80,7 +81,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		return askUserForCode( authUrl );
 	}
 
-	private String retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws Exception
+	private OAuthToken retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws Exception
 	{
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
@@ -95,11 +96,14 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		OAuthClient oAuthClient = new OAuthClient( new HttpClient4( HttpClientSupport.getHttpClient() ) );
 
 		// facebook and github do not return json and have their own response handlers
-		GitHubTokenResponse accessTokenResponse = oAuthClient.accessToken( accessTokenRequest, GitHubTokenResponse.class );
+//		OAuthToken token = oAuthClient.accessToken( accessTokenRequest, FacebookTokenResponse.class ).getOAuthToken();
+		OAuthToken token = oAuthClient.accessToken( accessTokenRequest, OAuthJSONAccessTokenResponse.class ).getOAuthToken();
+		String accessToken = token.getAccessToken();
 
-		String accessToken = accessTokenResponse.getAccessToken();
-		SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, accessTokenResponse.getExpiresIn() ) );
-		return accessToken;
+		SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, token.getExpiresIn() ) );
+		SoapUI.log( String.format( "Refresh Token: %s", token.getRefreshToken()) );
+
+		return token;
 	}
 
 	private String createAuthUrl( String oauthConsumerKey ) throws Exception
@@ -108,14 +112,16 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 				.authorizationProvider( provider )
 				.setClientId( oauthConsumerKey )
 				.setRedirectURI( CALLBACK_URL )
+				.setResponseType( "code" )
+				.setScope( "https://www.googleapis.com/auth/drive" )
 				.buildQueryMessage().getLocationUri();
 	}
 
-	private void signRequest( String accessToken, SubmitContext context ) throws Exception
+	private void signRequest( OAuthToken token, SubmitContext context ) throws Exception
 	{
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 		String uri = httpRequest.getRequestLine().getUri();
-		OAuthClientRequest req = new OAuthBearerClientRequest( uri ).setAccessToken( accessToken ).buildHeaderMessage();
+		OAuthClientRequest req = new OAuthBearerClientRequest( uri ).setAccessToken( token.getAccessToken() ).buildHeaderMessage();
 
 		Map<String, String> headers = req.getHeaders();
 
