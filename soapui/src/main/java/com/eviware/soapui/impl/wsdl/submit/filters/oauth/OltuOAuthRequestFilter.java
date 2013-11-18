@@ -9,7 +9,6 @@ import com.eviware.soapui.model.iface.SubmitContext;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.support.ModelSupport;
 import com.eviware.soapui.support.StringUtils;
-import com.eviware.soapui.support.UISupport;
 import org.apache.http.HttpRequest;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
@@ -46,6 +45,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	public static final String CALLBACK_URL = "http://localhost:8080/";
 
 	private OAuthToken token;
+	private Project project;
 
 	@Override
 	public void filterRestRequest( SubmitContext context, RestRequestInterface request )
@@ -53,7 +53,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 		try
 		{
-			Project project = ModelSupport.getModelItemProject( request );
+			project = ModelSupport.getModelItemProject( request );
 			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_API_KEY );
 			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_API_SECRET );
 
@@ -82,7 +82,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	private String authorize( String oauthConsumerKey ) throws Exception
 	{
 		String authUrl = createAuthUrl( oauthConsumerKey );
-		return askUserForCode( authUrl );
+		return waitForAuthorizationCode( authUrl );
 	}
 
 	private OAuthToken retrieveAccessTokenUsingRefreshToken( String oauthConsumerKey, String oauthConsumerSecret ) throws Exception
@@ -152,9 +152,16 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		}
 	}
 
-	private String askUserForCode( String authUrl ) throws IOException
+	private String waitForAuthorizationCode( String authUrl ) throws IOException
 	{
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
-		return UISupport.getDialogs().prompt( "Please enter the authorization code", "title" );
+		String code = project.getPropertyValue( "code" );
+		long startTime = System.currentTimeMillis();
+		while( code ==null || System.currentTimeMillis()-startTime < 30000)
+		{
+			code = project.getPropertyValue( "code" );
+		}
+		project.setPropertyValue( "code", null );
+		return code;
 	}
 }
