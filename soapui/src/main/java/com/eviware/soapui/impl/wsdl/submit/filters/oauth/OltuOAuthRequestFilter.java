@@ -14,11 +14,10 @@ import org.apache.http.HttpRequest;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
-import org.apache.oltu.oauth2.client.response.GitHubTokenResponse;
-import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.oltu.oauth2.common.OAuthProviderType;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
+import org.apache.oltu.oauth2.common.token.BasicOAuthToken;
 import org.apache.oltu.oauth2.common.token.OAuthToken;
 import org.apache.oltu.oauth2.httpclient4.HttpClient4;
 
@@ -40,9 +39,10 @@ import java.util.Map;
 public class OltuOAuthRequestFilter extends AbstractRequestFilter
 {
 
-	private static final String PROPERTY_NAME_OAUTH_CONSUMER_KEY = "oauth_consumer_key";
-	private static final String PROPERTY_NAME_OAUTH_CONSUMER_SECRET = "oauth_consumer_secret";
+	private static final String PROPERTY_NAME_API_KEY = "oauth_consumer_key";
+	private static final String PROPERTY_NAME_API_SECRET = "oauth_consumer_secret";
 	private static final OAuthProviderType provider = OAuthProviderType.GOOGLE;
+	//	private static final OAuthProviderType provider = OAuthProviderType.FACEBOOK;
 	public static final String CALLBACK_URL = "http://localhost:8080/";
 
 	private OAuthToken token;
@@ -54,8 +54,8 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		try
 		{
 			Project project = ModelSupport.getModelItemProject( request );
-			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_KEY );
-			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_OAUTH_CONSUMER_SECRET );
+			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_API_KEY );
+			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_API_SECRET );
 
 			// Authorize
 			if( token == null || StringUtils.isNullOrEmpty( token.getAccessToken() ) )
@@ -64,6 +64,10 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 				// get access token
 				token = retrieveAccessToken( oauthConsumerKey, oauthConsumerSecret, authorizationCode );
+			}
+			else
+			{
+				token = retrieveAccessTokenUsingRefreshToken( oauthConsumerKey, oauthConsumerSecret );
 			}
 
 			// sign the request using the access token
@@ -79,6 +83,23 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 		String authUrl = createAuthUrl( oauthConsumerKey );
 		return askUserForCode( authUrl );
+	}
+
+	private OAuthToken retrieveAccessTokenUsingRefreshToken( String oauthConsumerKey, String oauthConsumerSecret ) throws Exception
+	{
+		OAuthClientRequest accessTokenRequest = OAuthClientRequest
+				.tokenProvider( provider )
+				.setGrantType( GrantType.REFRESH_TOKEN )
+				.setClientId( oauthConsumerKey )
+				.setClientSecret( oauthConsumerSecret )
+				.setRefreshToken( token.getRefreshToken() )
+				.buildBodyMessage();
+
+		OAuthClient oAuthClient = new OAuthClient( new HttpClient4( HttpClientSupport.getHttpClient() ) );
+
+		OAuthToken accessToken = oAuthClient.accessToken( accessTokenRequest, OAuthJSONAccessTokenResponse.class ).getOAuthToken();
+
+		return new BasicOAuthToken( accessToken.getAccessToken(), accessToken.getExpiresIn(), token.getRefreshToken(), accessToken.getScope() );
 	}
 
 	private OAuthToken retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws Exception
@@ -101,7 +122,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		String accessToken = token.getAccessToken();
 
 		SoapUI.log( String.format( "Access Token: %s, Expires in: %s", accessToken, token.getExpiresIn() ) );
-		SoapUI.log( String.format( "Refresh Token: %s", token.getRefreshToken()) );
+		SoapUI.log( String.format( "Refresh Token: %s", token.getRefreshToken() ) );
 
 		return token;
 	}
