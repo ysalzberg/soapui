@@ -1,13 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project activeEnvironment="Default" name="Google Drive" resourceRoot="" soapui-version="4.6.2-SNAPSHOT" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="Port">8081</con:setting><con:setting id="Set endpoint for HTTP Tunnel:">https://</con:setting><con:setting id="HTTP tunnel - KeyStore"/><con:setting id="HTTP tunnel - Password"/><con:setting id="HTTP tunnel - KeyPassword"/><con:setting id="HTTP tunnel - TrustStore"/><con:setting id="HTTP tunnel - TrustStore Password"/><con:setting id="Reuse request state">false</con:setting><con:setting id="HTTP tunnel - Set SSL Client Key Store path"/><con:setting id="Content types to monitor">*/html, */xml, */soap+xml, */json, */x-json, */javascript, */x-amf</con:setting><con:setting id="HTTP tunnel - Set SSL Client Key Store Password"/></con:settings><con:interface xsi:type="con:RestService" wadlVersion="http://wadl.dev.java.net/2009/02" name="https://www.googleapis.com" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>https://www.googleapis.com</con:endpoint></con:endpoints><con:resource name="About" path="/drive/v2/about"><con:settings/><con:parameters/><con:method name="About" method="GET"><con:settings/><con:parameters/><con:representation type="FAULT"><con:mediaType>application/json; charset=UTF-8</con:mediaType><con:status>401 403</con:status><con:params/><con:element xmlns:abo="https://www.googleapis.com/drive/v2/about">abo:Fault</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>application/json; charset=UTF-8</con:mediaType><con:status>200</con:status><con:params/><con:element xmlns:abo="https://www.googleapis.com/drive/v2/about">abo:Response</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://www.googleapis.com</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:mockService port="8080" path="/" host="andersj" name="MockService 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.mock.WsdlMockService@require-soap-action">false</con:setting></con:settings><con:properties/><con:onRequestScript>import com.google.common.base.Splitter;
+<con:soapui-project activeEnvironment="Default" name="Google Drive" resourceRoot="" soapui-version="4.6.2-SNAPSHOT" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="Port">8081</con:setting><con:setting id="Set endpoint for HTTP Tunnel:">https://</con:setting><con:setting id="HTTP tunnel - KeyStore"/><con:setting id="HTTP tunnel - Password"/><con:setting id="HTTP tunnel - KeyPassword"/><con:setting id="HTTP tunnel - TrustStore"/><con:setting id="HTTP tunnel - TrustStore Password"/><con:setting id="Reuse request state">false</con:setting><con:setting id="HTTP tunnel - Set SSL Client Key Store path"/><con:setting id="Content types to monitor">*/html, */xml, */soap+xml, */json, */x-json, */javascript, */x-amf</con:setting><con:setting id="HTTP tunnel - Set SSL Client Key Store Password"/></con:settings><con:interface xsi:type="con:RestService" wadlVersion="http://wadl.dev.java.net/2009/02" name="https://www.googleapis.com" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>https://www.googleapis.com</con:endpoint></con:endpoints><con:resource name="About" path="/drive/v2/about"><con:settings/><con:parameters/><con:method name="About" method="GET"><con:settings/><con:parameters/><con:representation type="FAULT"><con:mediaType>application/json; charset=UTF-8</con:mediaType><con:status>401 403</con:status><con:params/><con:element xmlns:abo="https://www.googleapis.com/drive/v2/about">abo:Fault</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>application/json; charset=UTF-8</con:mediaType><con:status>200</con:status><con:params/><con:element xmlns:abo="https://www.googleapis.com/drive/v2/about">abo:Response</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://www.googleapis.com</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:mockService port="8080" path="/" host="andersj" name="MockService 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.mock.WsdlMockService@require-soap-action">false</con:setting></con:settings><con:properties/><con:onRequestScript>import org.apache.oltu.oauth2.as.issuer.MD5Generator;
+import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
+import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
+import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
+import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
+import org.apache.oltu.oauth2.as.response.OAuthASResponse;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import org.apache.oltu.oauth2.common.message.OAuthResponse;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import com.google.common.base.Splitter;
 import java.util.Map;
 
-queryString = mockRequest.getHttpRequest().getQueryString();
-log.info(queryString)
-Map&lt;String, String> split = Splitter.on( '&amp;' ).withKeyValueSeparator( "=" ).split( queryString );
+
+authCode = "123authorizationcode123"
+accessToken = "123accesstoken123"
+refreshToken = "123refreshtoken123"
+ uri = mockRequest.getHttpRequest().getRequestURL();
+ log.info("URI: "+ uri)
+ queryString = mockRequest.getHttpRequest().getQueryString();
+
+ if(queryString!=null &amp;&amp; queryString.contains("code="))
+ {
+ 	queryString = mockRequest.getHttpRequest().getQueryString();
+	log.info(queryString)
+	Map&lt;String, String> split = Splitter.on( '&amp;' ).withKeyValueSeparator( "=" ).split( queryString );
+	
+	
+	mockRunner.mockService.project.setPropertyValue("code", split.get("code"))
+	log.info("Code from project property: " + mockRunner.mockService.project.getPropertyValue("code"))
+	log.info("Code: " + split.get("code"))
+ } else if(uri.contains("/authorize"))
+ {
+ 	log.info("Inside authorization")
+ 	try {
+			OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest( mockRequest.getHttpRequest() );
+			//build OAuth response
+			OAuthResponse resp = OAuthASResponse
+					.authorizationResponse(mockRequest.getHttpRequest(), HttpServletResponse.SC_FOUND)
+					.setCode(authCode)
+					.location(oauthRequest.getRedirectURI())
+					.buildQueryMessage();
+
+			mockRequest.getHttpResponse().sendRedirect(resp.getLocationUri());
+
+			//if something goes wrong
+		} catch(OAuthProblemException ex) {
+			
+			try
+			{
+				OAuthResponse resp = OAuthASResponse
+						.errorResponse( HttpServletResponse.SC_FOUND )
+						.error( ex )
+						.location( ex.getRedirectUri() )
+						.buildQueryMessage();
+				mockRequest.getHttpResponse().sendRedirect( resp.getLocationUri() );
+			}
+			catch( Exception e )
+			{
+				log.info(e);
+			}
+		}
+		catch( Exception e )
+		{
+			log.info(e);
+		}
+ } else if(uri.contains("/access_token"))
+ {
+ 	log.info("Inside access token")
+ 		try {
+			OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
+			OAuthResponse r = OAuthASResponse
+					.tokenResponse(HttpServletResponse.SC_OK)
+					.setAccessToken(accessToken)
+					.setExpiresIn("3600")
+					.setRefreshToken(refreshToken)
+					.buildJSONMessage();
+
+			mockRequest.getHttpResponse().setStatus(r.getResponseStatus());
+			PrintWriter pw = mockRequest.getHttpResponse().getWriter();
+			pw.print(r.getBody());
+			pw.flush();
+			pw.close();
+
+			//if something goes wrong
+		} catch(OAuthProblemException ex) {
+
+			try
+			{
+				OAuthResponse r = OAuthResponse
+						.errorResponse( 401 )
+						.error(ex)
+						.buildJSONMessage();
+				mockRequest.getHttpResponse().setStatus(r.getResponseStatus());
+
+				PrintWriter pw = mockRequest.getHttpResponse().getWriter();
+				pw.print(r.getBody());
+				pw.flush();
+				pw.close();
+
+				mockRequest.getHttpResponse().sendError(401);
+			}
+			catch( Exception e )
+			{
+				log.info(e);
+			}
+		}
+		catch( Exception e )
+		{
+			log.info(e);
+		}
+ }
 
 
-log.info(mockRunner.mockService.project.setPropertyValue("code", split.get("code")))
-log.info(mockRunner.mockService.project.getPropertyValue("code"))
-log.info(split.get("code"))
 </con:onRequestScript></con:mockService><con:properties><con:property><con:name>oauth_consumer_key</con:name><con:value>236826593801.apps.googleusercontent.com</con:value></con:property><con:property><con:name>oauth_consumer_secret</con:name><con:value>BBTkN0E_ieV7ykF7ouWthVJ1</con:value></con:property><con:property><con:name>code</con:name><con:value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/></con:property></con:properties><con:wssContainer/><con:sensitiveInformation/></con:soapui-project>

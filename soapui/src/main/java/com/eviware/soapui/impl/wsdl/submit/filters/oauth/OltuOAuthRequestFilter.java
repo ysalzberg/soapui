@@ -89,6 +89,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
+//				.tokenLocation( "http://localhost:8080/access_token" )
 				.setGrantType( GrantType.REFRESH_TOKEN )
 				.setClientId( oauthConsumerKey )
 				.setClientSecret( oauthConsumerSecret )
@@ -107,6 +108,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
+//				.tokenLocation( "http://localhost:8080/access_token")
 				.setGrantType( GrantType.AUTHORIZATION_CODE )
 				.setClientId( oauthConsumerKey )
 				.setClientSecret( oauthConsumerSecret )
@@ -131,6 +133,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 		return OAuthClientRequest
 				.authorizationProvider( provider )
+//				.authorizationLocation( "http://localhost:8080/authorize" )
 				.setClientId( oauthConsumerKey )
 				.setRedirectURI( CALLBACK_URL )
 				.setResponseType( "code" )
@@ -157,7 +160,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
 		String code = project.getPropertyValue( "code" );
 		long startTime = System.currentTimeMillis();
-		while( code ==null || System.currentTimeMillis()-startTime < 30000)
+		while( code ==null && System.currentTimeMillis()-startTime < 30000)
 		{
 			code = project.getPropertyValue( "code" );
 		}
