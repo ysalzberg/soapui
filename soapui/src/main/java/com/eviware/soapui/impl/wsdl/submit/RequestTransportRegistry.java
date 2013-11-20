@@ -61,11 +61,11 @@ public class RequestTransportRegistry
 		httpTransport.addRequestFilter( new WsrmRequestFilter() );
 		httpTransport.addRequestFilter( new WssRequestFilter() );
 
-//		httpTransport.addRequestFilter( new SingpostOAuthRequestFilter() );
+		httpTransport.addRequestFilter( new SignpostOAuthRequestFilter() );
 //		httpTransport.addRequestFilter( new ScribeOAuthRequestFilter() );
 //		httpTransport.addRequestFilter( new SignpostPreAuthorizedOauthRequestFilter() );
 
-		httpTransport.addRequestFilter( new OltuOAuthRequestFilter() );
+//		httpTransport.addRequestFilter( new OltuOAuthRequestFilter() );
 //		httpTransport.addRequestFilter( new GoogleOAuthRequestFilter() );
 
 

@@ -35,7 +35,7 @@ import java.net.URI;
  *
  * @author Anders Jaensson
  */
-public class SingpostOAuthRequestFilter extends AbstractRequestFilter
+public class SignpostOAuthRequestFilter extends AbstractRequestFilter
 {
 	private static final CommonsHttpOAuthProvider twitterOAuthProvider = new CommonsHttpOAuthProvider(
 			"https://api.twitter.com/oauth/request_token",
@@ -107,7 +107,6 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 
 	private void signRequest( SubmitContext context, OAuthConsumer consumer ) throws Exception
 	{
-		// sign the request
 		HttpRequest httpRequest = ( HttpRequest )context.getProperty( BaseHttpRequestTransport.HTTP_METHOD );
 		consumer.sign( httpRequest );
 	}
@@ -115,6 +114,6 @@ public class SingpostOAuthRequestFilter extends AbstractRequestFilter
 	private String askUserForCode( String authUrl ) throws IOException
 	{
 		Desktop.getDesktop().browse( URI.create( authUrl ) );
-		return UISupport.getDialogs().prompt( "Please enter the authorization code", "title" );
+		return UISupport.getDialogs().prompt( "Please enter the verifier code", "title" );
 	}
 }
