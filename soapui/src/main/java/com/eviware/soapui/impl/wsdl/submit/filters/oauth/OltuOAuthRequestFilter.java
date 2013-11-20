@@ -86,6 +86,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
+//				.tokenLocation( "http://localhost:8080/access_token" )
 				.setGrantType( GrantType.REFRESH_TOKEN )
 				.setClientId( apiKey )
 				.setClientSecret( apiSecret )
@@ -104,6 +105,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
+//				.tokenLocation( "http://localhost:8080/access_token" )
 				.setGrantType( GrantType.AUTHORIZATION_CODE )
 				.setClientId( apiKey )
 				.setClientSecret( apiSecret )
@@ -129,6 +131,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	{
 		return OAuthClientRequest
 				.authorizationProvider( provider )
+//				.authorizationLocation( "http://localhost:8080/authorize" )
 				.setClientId( apiKey )
 				.setRedirectURI( CALLBACK_URL )
 				.setResponseType( "code" )
