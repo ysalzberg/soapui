@@ -41,8 +41,8 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 	private static final String PROPERTY_NAME_API_KEY = "oauth_consumer_key";
 	private static final String PROPERTY_NAME_API_SECRET = "oauth_consumer_secret";
 	private static final OAuthProviderType provider = OAuthProviderType.GOOGLE;
-	//	private static final OAuthProviderType provider = OAuthProviderType.FACEBOOK;
 	public static final String CALLBACK_URL = "http://localhost:8080/";
+	public static final String GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 
 	private OAuthToken token;
 	private Project project;
@@ -54,20 +54,17 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		try
 		{
 			project = ModelSupport.getModelItemProject( request );
-			String oauthConsumerKey = project.getPropertyValue( PROPERTY_NAME_API_KEY );
-			String oauthConsumerSecret = project.getPropertyValue( PROPERTY_NAME_API_SECRET );
+			String apiKey = project.getPropertyValue( PROPERTY_NAME_API_KEY );
+			String apiSecret = project.getPropertyValue( PROPERTY_NAME_API_SECRET );
 
-			// Authorize
 			if( token == null || StringUtils.isNullOrEmpty( token.getAccessToken() ) )
 			{
-				String authorizationCode = authorize( oauthConsumerKey );
-
-				// get access token
-				token = retrieveAccessToken( oauthConsumerKey, oauthConsumerSecret, authorizationCode );
+				String authorizationCode = authorize( apiKey );
+				token = retrieveAccessToken( apiKey, apiSecret, authorizationCode );
 			}
 			else
 			{
-				token = retrieveAccessTokenUsingRefreshToken( oauthConsumerKey, oauthConsumerSecret );
+				token = retrieveAccessTokenUsingRefreshToken( apiKey, apiSecret );
 			}
 
 			// sign the request using the access token
@@ -85,14 +82,13 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		return waitForAuthorizationCode( authUrl );
 	}
 
-	private OAuthToken retrieveAccessTokenUsingRefreshToken( String oauthConsumerKey, String oauthConsumerSecret ) throws Exception
+	private OAuthToken retrieveAccessTokenUsingRefreshToken( String apiKey, String apiSecret ) throws Exception
 	{
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
-//				.tokenLocation( "http://localhost:8080/access_token" )
 				.setGrantType( GrantType.REFRESH_TOKEN )
-				.setClientId( oauthConsumerKey )
-				.setClientSecret( oauthConsumerSecret )
+				.setClientId( apiKey )
+				.setClientSecret( apiSecret )
 				.setRefreshToken( token.getRefreshToken() )
 				.buildBodyMessage();
 
@@ -103,15 +99,14 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		return new BasicOAuthToken( accessToken.getAccessToken(), accessToken.getExpiresIn(), token.getRefreshToken(), accessToken.getScope() );
 	}
 
-	private OAuthToken retrieveAccessToken( String oauthConsumerKey, String oauthConsumerSecret, String code ) throws Exception
+	private OAuthToken retrieveAccessToken( String apiKey, String apiSecret, String code ) throws Exception
 	{
 
 		OAuthClientRequest accessTokenRequest = OAuthClientRequest
 				.tokenProvider( provider )
-//				.tokenLocation( "http://localhost:8080/access_token")
 				.setGrantType( GrantType.AUTHORIZATION_CODE )
-				.setClientId( oauthConsumerKey )
-				.setClientSecret( oauthConsumerSecret )
+				.setClientId( apiKey )
+				.setClientSecret( apiSecret )
 				.setRedirectURI( CALLBACK_URL )
 				.setCode( code )
 				.buildBodyMessage();
@@ -120,6 +115,7 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 
 		// facebook and github do not return json and have their own response handlers
 //		OAuthToken token = oAuthClient.accessToken( accessTokenRequest, FacebookTokenResponse.class ).getOAuthToken();
+
 		OAuthToken token = oAuthClient.accessToken( accessTokenRequest, OAuthJSONAccessTokenResponse.class ).getOAuthToken();
 		String accessToken = token.getAccessToken();
 
@@ -129,15 +125,14 @@ public class OltuOAuthRequestFilter extends AbstractRequestFilter
 		return token;
 	}
 
-	private String createAuthUrl( String oauthConsumerKey ) throws Exception
+	private String createAuthUrl( String apiKey ) throws Exception
 	{
 		return OAuthClientRequest
 				.authorizationProvider( provider )
-//				.authorizationLocation( "http://localhost:8080/authorize" )
-				.setClientId( oauthConsumerKey )
+				.setClientId( apiKey )
 				.setRedirectURI( CALLBACK_URL )
 				.setResponseType( "code" )
-				.setScope( "https://www.googleapis.com/auth/drive" )
+				.setScope( GOOGLE_DRIVE_SCOPE )
 				.buildQueryMessage().getLocationUri();
 	}
 
