@@ -15,6 +15,7 @@ package com.eviware.soapui.support.editor.inspectors.aut;
 import com.eviware.soapui.config.CredentialsConfig.AuthType;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
+import com.eviware.soapui.support.components.JCollapsiblePanel;
 import com.eviware.soapui.support.components.SimpleBindingForm;
 import com.eviware.soapui.support.editor.EditorView;
 import com.eviware.soapui.support.editor.inspectors.AbstractXmlInspector;
@@ -23,73 +24,64 @@ import com.eviware.soapui.support.editor.xml.XmlDocument;
 import com.eviware.soapui.support.types.StringList;
 import com.jgoodies.binding.PresentationModel;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RequestAuthenticationInspector extends AbstractXmlInspector
-{
-	private JPanel mainPanel;
-	private final AbstractHttpRequest<?> request;
-	private SimpleBindingForm form;
+public class RequestAuthenticationInspector extends AbstractXmlInspector {
+    private JPanel mainPanel;
+    private final AbstractHttpRequest<?> request;
+    private SimpleBindingForm form;
+    private List<JCollapsiblePanel> accordion = new ArrayList<JCollapsiblePanel>();
 
-	protected RequestAuthenticationInspector( AbstractHttpRequest<?> request )
-	{
-		super( "Auth", "Authentication and Security-related settings", true, AuthInspectorFactory.INSPECTOR_ID );
-		this.request = request;
-	}
+    protected RequestAuthenticationInspector(AbstractHttpRequest<?> request) {
+        super("Auth", "Authentication and Security-related settings", true, AuthInspectorFactory.INSPECTOR_ID);
+        this.request = request;
+    }
 
-	public JComponent getComponent()
-	{
-		if( mainPanel == null )
-		{
-			mainPanel = new JPanel( new BorderLayout() );
+    public JComponent getComponent() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel(new BorderLayout());
 
-			form = new SimpleBindingForm( new PresentationModel<AbstractHttpRequest<?>>( request ) );
-			form.addSpace( 5 );
-			form.appendComboBox( "authType", "Authorisation Type", new String[] { AuthType.GLOBAL_HTTP_SETTINGS.toString(),
-					AuthType.PREEMPTIVE.toString(), AuthType.NTLM_KERBEROS.toString() }, "" );
-			form.appendTextField( "username", "Username", "The username to use for HTTP Authentication" );
-			form.appendPasswordField( "password", "Password", "The password to use for HTTP Authentication" );
-			form.appendTextField( "domain", "Domain", "The domain to use for Authentication(NTLM/Kerberos)" );
+            form = new SimpleBindingForm(new PresentationModel<AbstractHttpRequest<?>>(request));
 
-			if( request instanceof WsdlRequest )
-			{
-				StringList outgoingNames = new StringList( request.getOperation().getInterface().getProject()
-						.getWssContainer().getOutgoingWssNames() );
-				outgoingNames.add( "" );
-				StringList incomingNames = new StringList( request.getOperation().getInterface().getProject()
-						.getWssContainer().getIncomingWssNames() );
-				incomingNames.add( "" );
+            addNewAccordionItem(accordion);
+            addNewAccordionItem(accordion);
+            addNewAccordionItem(accordion);
+            addNewAccordionItem(accordion);
 
-				form.addSpace( 5 );
-				form.appendComboBox( "outgoingWss", "Outgoing WSS", outgoingNames.toStringArray(),
-						"The outgoing WS-Security configuration to use" );
-				form.appendComboBox( "incomingWss", "Incoming WSS", incomingNames.toStringArray(),
-						"The incoming WS-Security configuration to use" );
-			}
+            for (JCollapsiblePanel accordionItem : accordion) {
+                form.addComponent(accordionItem);
+            }
 
-			form.addSpace( 5 );
+            mainPanel.add(new JScrollPane(form.getPanel()), BorderLayout.CENTER);
+        }
 
-			mainPanel.add( new JScrollPane( form.getPanel() ), BorderLayout.CENTER );
-		}
+        return mainPanel;
+    }
 
-		return mainPanel;
-	}
 
-	@Override
-	public void release()
-	{
-		super.release();
+    @Override
+    public void release() {
+        super.release();
 
-		if( form != null )
-			form.getPresentationModel().release();
-	}
+        if (form != null)
+            form.getPresentationModel().release();
+    }
 
-	@Override
-	public boolean isEnabledFor( EditorView<XmlDocument> view )
-	{
-		return !view.getViewId().equals( RawXmlEditorFactory.VIEW_ID );
-	}
+    @Override
+    public boolean isEnabledFor(EditorView<XmlDocument> view) {
+        return !view.getViewId().equals(RawXmlEditorFactory.VIEW_ID);
+    }
+
+
+    private JPanel addNewAccordionItem(List<JCollapsiblePanel> accordion) {
+        JPanel contentPanel = new JPanel();
+        contentPanel.add(new JLabel("Content"));
+        JCollapsiblePanel panel = new JCollapsiblePanel(contentPanel, "Item");
+        panel.setExpanded(false);
+        accordion.add(panel);
+        return contentPanel;
+    }
 }
