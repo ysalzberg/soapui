@@ -32,10 +32,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
