@@ -14,13 +14,14 @@ package com.eviware.soapui.impl.rest.actions.oauth;
 
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.rest.OAuth2Profile;
-import com.eviware.soapui.impl.rest.RestRequestInterface;
-import com.eviware.soapui.impl.rest.support.RestUtils;
-import com.eviware.soapui.impl.support.http.HttpRequestInterface;
 import com.eviware.soapui.impl.wsdl.support.http.HttpClientSupport;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.support.StringUtils;
-import com.eviware.soapui.support.types.StringToStringsMap;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
@@ -32,6 +33,7 @@ import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.apache.oltu.oauth2.common.token.OAuthToken;
 import org.apache.oltu.oauth2.httpclient4.HttpClient4;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -258,35 +260,25 @@ public class OltuOAuth2ClientFacade implements OAuth2ClientFacade
 	}
 
 	@Override
-	public void applyAccessToken( OAuth2Profile profile, RestRequestInterface request )
+	public void applyAccessToken( OAuth2Profile profile, HttpRequestBase request, String requestContent )
 	{
 
-		if( StringUtils.isNullOrEmpty( profile.getAccessToken() ) )
-		{
-			// Since access token is null/empty we don't append it
-			StringToStringsMap requestHeaders = request.getRequestHeaders();
-			requestHeaders.remove( OAuth.HeaderType.AUTHORIZATION );
-			request.setRequestHeaders( requestHeaders );
-			return;
-		}
-
-
-		String uri = request.getPath();
-		OAuthBearerClientRequest oAuthBearerClientRequest = new OAuthBearerClientRequest( uri ).setAccessToken( profile.getAccessToken() );
+		String uri = request.getURI().getPath();
+		OAuthBearerClientRequest oAuthClientRequest = new OAuthBearerClientRequest( uri ).setAccessToken( profile.getAccessToken() );
 
 		try
 		{
 			switch( profile.getAccessTokenPosition() )
 			{
 				case QUERY:
-					appendAccessTokenToQuery( request, oAuthBearerClientRequest );
+					appendAccessTokenToQuery( request, oAuthClientRequest );
 					break;
 				case BODY:
-					appendAccessTokenToBody( request, oAuthBearerClientRequest );
+					appendAccessTokenToBody( request, oAuthClientRequest );
 					break;
 				case HEADER:
 				default:
-					appendAccessTokenToHeader( request, oAuthBearerClientRequest );
+					appendAccessTokenToHeader( request, oAuthClientRequest );
 					break;
 			}
 		}
@@ -296,29 +288,57 @@ public class OltuOAuth2ClientFacade implements OAuth2ClientFacade
 		}
 	}
 
-	private void appendAccessTokenToBody( RestRequestInterface request, OAuthBearerClientRequest oAuthBearerClientRequest ) throws OAuthSystemException
+	private void appendAccessTokenToBody(HttpRequestBase request, OAuthBearerClientRequest oAuthClientRequest )
+			throws OAuthSystemException
 	{
-		String bodyWithAccessToken = oAuthBearerClientRequest.buildBodyMessage().getBody();
-		request.setRequestContent( request.getRequestContent() + bodyWithAccessToken );
+		try
+		{
+			if(request instanceof HttpEntityEnclosingRequest )
+			{
+				HttpEntity httpEntity = ( ( HttpEntityEnclosingRequest )request ).getEntity();
+				if(httpEntity==null)
+				{
+					String accenTokenParameter = getQueryStringFromOAuthClientRequest( oAuthClientRequest );
+					( ( HttpEntityEnclosingRequest )request).setEntity( new StringEntity( accenTokenParameter ) );
+				}  else
+				{
+					//TODO: re-create the entity from existing one and append the new content for access token
+				}
+			}
+		}catch( UnsupportedEncodingException e )
+		{
+			throw new OAuthSystemException( e );
+		}
 	}
 
-	private void appendAccessTokenToQuery( RestRequestInterface request, OAuthBearerClientRequest oAuthBearerClientRequest ) throws OAuthSystemException
+	private void appendAccessTokenToQuery( HttpRequestBase request, OAuthBearerClientRequest oAuthClientRequest ) throws OAuthSystemException
 	{
-		String uriWithAccessToken = oAuthBearerClientRequest.buildQueryMessage().getLocationUri();
-		String queryString = uriWithAccessToken.split( "\\?" )[1];
-		RestUtils.extractParamsFromQueryString( request.getParams(), queryString );
+		String queryString = getQueryStringFromOAuthClientRequest( oAuthClientRequest );
+		URI oldUri = request.getURI();
+		String requestQueryString = oldUri.getQuery() != null ? oldUri.getQuery() + "&" + queryString : queryString;
+
+		try
+		{
+			request.setURI( URIUtils.createURI( oldUri.getScheme(), oldUri.getHost(), oldUri.getPort(),
+					oldUri.getRawPath(), requestQueryString, oldUri.getFragment() ) );
+		}
+		catch( URISyntaxException e )
+		{
+			throw new OAuthSystemException( e );
+		}
 	}
 
-	private void appendAccessTokenToHeader( HttpRequestInterface request, OAuthBearerClientRequest oAuthBearerClientRequest ) throws OAuthSystemException
+	private String getQueryStringFromOAuthClientRequest( OAuthBearerClientRequest oAuthClientRequest ) throws OAuthSystemException
 	{
-		OAuthClientRequest oAuthClientRequest = oAuthBearerClientRequest.buildHeaderMessage();
+		String uriWithAccessToken = oAuthClientRequest.buildQueryMessage().getLocationUri();
+		return uriWithAccessToken.split( "\\?" )[1];
+	}
 
-		Map<String, String> oAuthHeaders = oAuthClientRequest.getHeaders();
-		StringToStringsMap requestHeaders = request.getRequestHeaders();
-		// replacing the old value since we no more care about it
-		requestHeaders.remove( OAuth.HeaderType.AUTHORIZATION );
-		requestHeaders.add( OAuth.HeaderType.AUTHORIZATION, oAuthHeaders.get( OAuth.HeaderType.AUTHORIZATION ) );
-		request.setRequestHeaders( requestHeaders );
+	private void appendAccessTokenToHeader( HttpRequestBase request, OAuthBearerClientRequest oAuthClientRequest ) throws OAuthSystemException
+	{
+		Map<String, String> oAuthHeaders = oAuthClientRequest.buildHeaderMessage().getHeaders();
+		request.removeHeaders( OAuth.HeaderType.AUTHORIZATION );
+		request.addHeader( OAuth.HeaderType.AUTHORIZATION, oAuthHeaders.get( OAuth.HeaderType.AUTHORIZATION ) );
 	}
 
 	@Override
