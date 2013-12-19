@@ -14,8 +14,8 @@ package com.eviware.soapui.support.editor.inspectors.auth;
 
 import com.eviware.soapui.config.CredentialsConfig.AuthType;
 import com.eviware.soapui.impl.rest.OAuth2Profile;
-import com.eviware.soapui.impl.rest.OAuth2ProfileContainer;
 import com.eviware.soapui.impl.rest.actions.oauth.GetOAuthAccessTokenAction;
+import com.eviware.soapui.impl.rest.actions.oauth.RefreshOAuthAccessTokenAction;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.support.components.SimpleBindingForm;
@@ -30,11 +30,15 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -196,14 +200,9 @@ public class RequestAuthenticationInspector extends AbstractXmlInspector
 		oauth2Form.addSpace( NORMAL_SPACING );
 
 		// TODO This should be a bit wider, but leaving it at default size for now
-		oauth2Form.addButtonWithoutLabel( "Get access token", new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				getAccessToken( e );
-			}
-		} );
+		oauth2Form.addButtonWithoutLabel( "Get access token", new GetOAuthAccessTokenAction( profile ) );
+
+		oauth2Form.addButtonWithoutLabel( "Refresh access token", new RefreshOAuthAccessTokenAction( profile ) );
 
 		oauth2Form.addSpace( GROUP_SPACING );
 
@@ -232,9 +231,5 @@ public class RequestAuthenticationInspector extends AbstractXmlInspector
 		}
 	}
 
-	private void getAccessToken( ActionEvent e )
-	{
-		GetOAuthAccessTokenAction getAccessTokenAction = new GetOAuthAccessTokenAction( profile );
-		getAccessTokenAction.actionPerformed( e );
-	}
+
 }
