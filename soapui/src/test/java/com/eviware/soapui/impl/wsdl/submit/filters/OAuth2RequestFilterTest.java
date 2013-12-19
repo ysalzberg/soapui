@@ -55,7 +55,7 @@ public class OAuth2RequestFilterTest
 	@Test
 	public void appliesAccessToken() throws URISyntaxException
 	{
-		String expectedAccessTokenValue = "Bearer "+ accessToken;
+		String expectedAccessTokenValue = "Bearer " + accessToken;
 		oAuth2RequestFilter.filterRestRequest( mockContext, restRequest );
 
 		assertThat( httpRequest.getHeaders(OAuth.HeaderType.AUTHORIZATION )[0].getValue(), is( expectedAccessTokenValue ) ) ;
@@ -67,7 +67,6 @@ public class OAuth2RequestFilterTest
 		restRequest.getOperation().getInterface().getProject().getOAuth2ProfileContainer().getOAuth2ProfileList().get( 0 ).setAccessToken( null );
 
 		oAuth2RequestFilter.filterRestRequest( mockContext, restRequest );
-
 		assertThat( httpRequest.getHeaders( OAuth.HeaderType.AUTHORIZATION ).length, is( 0 ) ) ;
 	}
 
