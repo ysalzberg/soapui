@@ -39,7 +39,7 @@ public class OAuth2RequestFilterTest
 		restRequest = ModelItemFactory.makeRestRequest();
 		WsdlProject project = restRequest.getOperation().getInterface().getProject();
 		OAuth2ProfileContainer oAuth2ProfileContainer = project.getOAuth2ProfileContainer();
-		OAuth2Profile oAuth2Profile = oAuth2ProfileContainer.addNewOAuth2Profile();
+		OAuth2Profile oAuth2Profile = oAuth2ProfileContainer.getOAuth2ProfileList().get( 0 );
 		oAuth2Profile.setAccessToken( accessToken );
 
 

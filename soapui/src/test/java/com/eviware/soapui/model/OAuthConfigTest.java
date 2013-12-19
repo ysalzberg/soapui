@@ -47,7 +47,7 @@ public class OAuthConfigTest
 
 		oAuth2ProfileContainer = project.getOAuth2ProfileContainer();
 
-		oAuth2Profile = oAuth2ProfileContainer.addNewOAuth2Profile();
+		oAuth2Profile = oAuth2ProfileContainer.getOAuth2ProfileList().get( 0 );
 		oAuth2Profile.setClientID( "google" );
 		oAuth2Profile.setAccessTokenURI( "http://google.com/accessTokenURI" );
 		oAuth2Profile.setAuthorizationURI( "http://google.com/auth" );
