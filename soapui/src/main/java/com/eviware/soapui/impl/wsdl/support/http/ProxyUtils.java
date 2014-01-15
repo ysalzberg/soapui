@@ -20,20 +20,12 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContext;
 import com.eviware.soapui.model.settings.Settings;
 import com.eviware.soapui.settings.ProxySettings;
 import com.eviware.soapui.support.StringUtils;
-import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultProxyAuthenticationHandler;
-import org.apache.http.impl.client.DefaultTargetAuthenticationHandler;
-import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
-import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
 import java.net.*;
@@ -208,7 +200,8 @@ public class ProxyUtils
 			{
 				proxySelector = getManualProxySelector( settings );
 			}
-			if(proxySelector != null) {
+			if( proxySelector != null )
+			{
 				// Don't register any proxies for other schemes
 				proxySelector = filterHttpHttpsProxy( proxySelector );
 			}
@@ -224,7 +217,7 @@ public class ProxyUtils
 	{
 		return new ProxyBypassListSelector(
 				Arrays.<UriFilter>asList( new SchemeProxyFilter( "http", "https" ) ),
-				proxySelector);
+				proxySelector );
 	}
 
 	private static ProxySelector getManualProxySelector( Settings settings )
@@ -251,7 +244,8 @@ public class ProxyUtils
 		@Override
 		protected PasswordAuthentication getPasswordAuthentication()
 		{
-			if(getRequestorType() != RequestorType.PROXY) {
+			if( getRequestorType() != RequestorType.PROXY )
+			{
 				return null;
 			}
 			Settings settings = SoapUI.getSettings();
