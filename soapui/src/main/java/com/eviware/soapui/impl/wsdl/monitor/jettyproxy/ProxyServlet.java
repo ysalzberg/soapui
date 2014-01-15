@@ -28,14 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.eviware.soapui.impl.wsdl.monitor.SoapMonitorListenerCallBack;
-import com.eviware.soapui.impl.wsdl.support.http.OverridableProxySelectorRoutePlanner;
+import com.eviware.soapui.impl.wsdl.support.http.ProxyUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.params.ConnRouteParams;
-import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.BasicHttpContext;
@@ -47,7 +44,6 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.actions.monitor.SoapMonitorAction;
 import com.eviware.soapui.impl.wsdl.actions.monitor.SoapMonitorAction.LaunchForm;
 import com.eviware.soapui.impl.wsdl.monitor.JProxyServletWsdlMonitorMessageExchange;
-import com.eviware.soapui.impl.wsdl.monitor.SoapMonitor;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.ExtendedHttpMethod;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedGetMethod;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedHeadMethod;
@@ -231,7 +227,7 @@ public class ProxyServlet implements Servlet
 
 		method.getParams().setParameter( ClientPNames.HANDLE_REDIRECTS, false );
 		setProtocolversion( method, request.getProtocol() );
-		OverridableProxySelectorRoutePlanner.setForceNoProxy( method.getParams() );
+		ProxyUtils.setForceDirectConnection( method.getParams() );
 		listenerCallBack.fireBeforeProxy( project, request, response, method );
 
 		if( settings.getBoolean( LaunchForm.SSLTUNNEL_REUSESTATE ) )

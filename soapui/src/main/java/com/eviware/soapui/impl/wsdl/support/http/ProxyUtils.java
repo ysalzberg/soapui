@@ -26,6 +26,7 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 
 import java.net.*;
@@ -51,7 +52,6 @@ public class ProxyUtils
 	{
 		setProxyEnabled( SoapUI.getSettings().getBoolean( ProxySettings.ENABLE_PROXY ) );
 		setAutoProxy( SoapUI.getSettings().getBoolean( ProxySettings.AUTO_PROXY ) );
-		setGlobalProxy( SoapUI.getSettings() );
 	}
 
 	private static String getExpandedProperty( PropertyExpansionContext context, Settings settings, String property )
@@ -237,6 +237,11 @@ public class ProxyUtils
 			SoapUI.logError( e, "Unable to expand proxy settings" );
 		}
 		return null;
+	}
+
+	public static void setForceDirectConnection( HttpParams params )
+	{
+		OverridableProxySelectorRoutePlanner.setForceDirectConnection( params );
 	}
 
 	private static class ProxySettingsAuthenticator extends Authenticator

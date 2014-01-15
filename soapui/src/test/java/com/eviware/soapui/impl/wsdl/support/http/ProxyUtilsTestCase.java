@@ -143,6 +143,31 @@ public class ProxyUtilsTestCase
 	}
 
 	@Test
+	public void forceDirectConnectionOverridesManualProxySettings()
+	{
+		ProxyUtils.setProxyEnabled( true );
+		ProxyUtils.setAutoProxy( false );
+		ProxyUtils.setForceDirectConnection( httpMethod.getParams() );
+
+		ProxyUtils.setGlobalProxy( manualSettings() );
+		assertGlobalProxyHost( MANUAL_SETTING_PROXY_HOST );
+		assertHttpClientProxyHost( null );
+	}
+
+	@Test
+	public void forceDirectConnectionOverridesAutomaticProxySettings()
+	{
+		ProxyUtils.setProxyEnabled( true );
+		ProxyUtils.setAutoProxy( true );
+		setProxySystemProperties();
+		ProxyUtils.setForceDirectConnection( httpMethod.getParams() );
+
+		ProxyUtils.setGlobalProxy( emptySettings() );
+		assertGlobalProxyHost( SYSTEM_PROPERTY_PROXY_HOST );
+		assertHttpClientProxyHost( null );
+	}
+
+	@Test
 	@Ignore
 	// To run this test manually set the environment variable http_proxy to "environmentshost.com"
 	public void givenAutomaticProxyDetectionAndEnvironmentProxySetThenUseTheEnvironmentProxy()

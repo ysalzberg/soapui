@@ -55,6 +55,9 @@ import java.security.cert.CertificateException;
 public class HttpClientSupport
 {
 	private final static Helper helper = new Helper();
+	static {
+		ProxyUtils.setGlobalProxy( SoapUI.getSettings() );
+	}
 
 	/**
 	 * Internal helper to ensure synchronized access..

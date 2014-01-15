@@ -27,11 +27,11 @@ import java.net.ProxySelector;
  */
 public class OverridableProxySelectorRoutePlanner extends ProxySelectorRoutePlanner
 {
-	private static final String FORCE_NO_PROXY = "FORCE_NO_PROXY";
+	private static final String FORCE_DIRECT_CONNECTION = "FORCE_DIRECT_CONNECTION";
 
-	public static void setForceNoProxy( HttpParams params )
+	static void setForceDirectConnection( HttpParams params )
 	{
-		params.setBooleanParameter( FORCE_NO_PROXY, true );
+		params.setBooleanParameter( FORCE_DIRECT_CONNECTION, true );
 	}
 
 	public OverridableProxySelectorRoutePlanner( SchemeRegistry registry, ProxySelector proxySelector )
@@ -42,7 +42,7 @@ public class OverridableProxySelectorRoutePlanner extends ProxySelectorRoutePlan
 	@Override
 	protected HttpHost determineProxy( HttpHost target, HttpRequest request, HttpContext context ) throws HttpException
 	{
-		if( request.getParams().getBooleanParameter( FORCE_NO_PROXY, false ) )
+		if( request.getParams().getBooleanParameter( FORCE_DIRECT_CONNECTION, false ) )
 		{
 			return null;
 		}
