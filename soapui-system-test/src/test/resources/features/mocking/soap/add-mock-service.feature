@@ -7,3 +7,4 @@ Feature: Add SOAP mock service
     When in soap operation context
     Then “Add to MockService” option is available
     And close SoapUI
+    And print Soap Mock

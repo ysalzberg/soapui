@@ -7,3 +7,4 @@ Feature: Add rest mock service
     When in rest request context
     Then “Add to REST mock service” option is available on REST Request
     And close SoapUI
+    And print REST Mock

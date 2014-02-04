@@ -9,6 +9,7 @@ Feature: REST request parameter synchronization across REST request, method and 
     Then request editor has parameter with name reqParam and value reqParamValue at row 0
     And resource editor has parameter with name reqParam and with empty value at row 0
     And close SoapUI
+    And print Add parameter in request editor
 
   Scenario: A new parameter in resource editor is synchronized with request editor
     Given SoapUI is started
@@ -17,6 +18,7 @@ Feature: REST request parameter synchronization across REST request, method and 
     Then resource editor has parameter with name resParam and value resParamValue at row 0
     And request editor has parameter with name resParam and value resParamValue at row 0
     And close SoapUI
+    And print Add parameter in resource editor
 
   Scenario: A new parameter in method editor is synchronized with request editor
     Given SoapUI is started
@@ -25,6 +27,7 @@ Feature: REST request parameter synchronization across REST request, method and 
     Then method editor has parameter with name methodParam and value methodParamValue at row 0
     And request editor has parameter with name methodParam and value methodParamValue at row 0
     And close SoapUI
+    And print Add parameter in method editor
 
   Scenario: A parameter is moved from method to resource when the level is changed from METHOD to RESOURCE in request
   editor
@@ -37,3 +40,4 @@ Feature: REST request parameter synchronization across REST request, method and 
     And resource editor has parameter with name reqParam and with empty value at row 0
     And resource editor has parameter with name methodParam and value methodParamValue at row 1
     And close SoapUI
+    And print Parameters synchronizes

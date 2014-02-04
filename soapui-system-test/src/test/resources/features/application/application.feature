@@ -5,3 +5,4 @@ Feature: Application
     Given SoapUI is started
     Then ensure that the main window is showing up without error
     And close SoapUI
+    And print Application

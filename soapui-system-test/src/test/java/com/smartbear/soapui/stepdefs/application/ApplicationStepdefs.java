@@ -47,6 +47,12 @@ public class ApplicationStepdefs
 		UISupport.setDialogs( new ConsoleDialogs() );
 	}
 
+	@Then( "^print (.+)$" )
+	public void printScenarioName( String name )
+	{
+		System.out.println( "Finishing scenario: " + name );
+	}
+
 	@After
 	public void closeSoapUIIfRunning()
 	{

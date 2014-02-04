@@ -14,6 +14,7 @@ Feature: OAuth2 Advance options
     And access token retrieval location is <accessTokenRetrievalPosition>
     And closes the advance options dialog
     And close SoapUI
+    And print Advanced OAuth2 options
 
   Examples:
   |accessTokenPosition  | accessTokenRetrievalPosition|
