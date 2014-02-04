@@ -1,5 +1,16 @@
-@Automated @Acceptance
+@Manual @Acceptance
 Feature: REST request parameter synchronization across REST request, method and resource
+
+  Scenario: By default a parameter is added to RESOURCE level and it is synchronized between request editor and
+  resource editor
+    Given SoapUI is started
+    And print Starting Scenario Add parameter in request editor
+    And a new REST project is created
+    When user adds a parameter in request editor with name reqParam and value reqParamValue
+    Then request editor has parameter with name reqParam and value reqParamValue at row 0
+    And resource editor has parameter with name reqParam and with empty value at row 0
+    And close SoapUI
+    And print Finishing Scenario Add parameter in request editor
 
   Scenario: A new parameter in resource editor is synchronized with request editor
     Given SoapUI is started
