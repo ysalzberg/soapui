@@ -1,4 +1,4 @@
-@Automated @Acceptance
+@Manual @Acceptance
 Feature: OAuth2 Advance options
 
   Scenario Outline: Changes selected in OAuth2 advance options dialog are set to profile
