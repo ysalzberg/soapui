@@ -50,7 +50,7 @@ public class ApplicationStepdefs
 	@Then( "^print (.+)$" )
 	public void printScenarioName( String name )
 	{
-		System.out.println( "Finishing scenario: " + name );
+		System.out.println( name );
 	}
 
 	@After

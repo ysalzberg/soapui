@@ -4,34 +4,38 @@ Feature: REST request parameter synchronization across REST request, method and 
   Scenario: By default a parameter is added to RESOURCE level and it is synchronized between request editor and
   resource editor
     Given SoapUI is started
+    And print Starting Scenario Add parameter in request editor
     And a new REST project is created
     When user adds a parameter in request editor with name reqParam and value reqParamValue
     Then request editor has parameter with name reqParam and value reqParamValue at row 0
     And resource editor has parameter with name reqParam and with empty value at row 0
     And close SoapUI
-    And print Add parameter in request editor
+    And print Finishing Scenario Add parameter in request editor
 
   Scenario: A new parameter in resource editor is synchronized with request editor
     Given SoapUI is started
+    And print Starting Scenario Add parameter in resource editor
     And a new REST project is created
     When user adds a parameter in resource editor with name resParam and value resParamValue
     Then resource editor has parameter with name resParam and value resParamValue at row 0
     And request editor has parameter with name resParam and value resParamValue at row 0
     And close SoapUI
-    And print Add parameter in resource editor
+    And print Finishing Scenario Add parameter in resource editor
 
   Scenario: A new parameter in method editor is synchronized with request editor
     Given SoapUI is started
+    And print Starting Scenario Add parameter in method editor
     And a new REST project is created
     When user adds a parameter in method editor with name methodParam and value methodParamValue
     Then method editor has parameter with name methodParam and value methodParamValue at row 0
     And request editor has parameter with name methodParam and value methodParamValue at row 0
     And close SoapUI
-    And print Add parameter in method editor
+    And print Finishing Scenario Add parameter in method editor
 
   Scenario: A parameter is moved from method to resource when the level is changed from METHOD to RESOURCE in request
   editor
     Given SoapUI is started
+    And print Starting Scenario Parameters synchronizes
     And a new REST project is created
     When user adds a parameter in method editor with name methodParam and value methodParamValue
     And  user adds a parameter in request editor with name reqParam and value reqParamValue
@@ -40,4 +44,4 @@ Feature: REST request parameter synchronization across REST request, method and 
     And resource editor has parameter with name reqParam and with empty value at row 0
     And resource editor has parameter with name methodParam and value methodParamValue at row 1
     And close SoapUI
-    And print Parameters synchronizes
+    And print Finishing Scenario Parameters synchronizes

@@ -3,6 +3,7 @@ Feature: OAuth2 Advance options
 
   Scenario Outline: Changes selected in OAuth2 advance options dialog are set to profile
     Given SoapUI is started
+    And print Starting Scenario Advanced OAuth2 options
     And a new REST project is created
     And the user clicks on the Auth tab
     And clicks on the OAuth 2 Authorization Type
@@ -14,7 +15,7 @@ Feature: OAuth2 Advance options
     And access token retrieval location is <accessTokenRetrievalPosition>
     And closes the advance options dialog
     And close SoapUI
-    And print Advanced OAuth2 options
+    And print Finishing Scenario Advanced OAuth2 options
 
   Examples:
   |accessTokenPosition  | accessTokenRetrievalPosition|
