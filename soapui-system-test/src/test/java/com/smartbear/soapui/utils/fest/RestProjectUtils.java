@@ -91,7 +91,20 @@ public final class RestProjectUtils
 		robot.waitForIdle();
 		int rowNumToEdit = restParamsTable.target.getRowCount() - 1;
 		editTableCell( paramName, restParamsTable, robot, rowNumToEdit, 0 );
+		sleep( 500 );
 		editTableCell( paramValue, restParamsTable, robot, rowNumToEdit, 1 );
+	}
+
+	private static void sleep( int milliseconds )
+	{
+		try
+		{
+			Thread.sleep( milliseconds );
+		}
+		catch( InterruptedException e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public static void changeParameterLevel( JPanelFixture parentPanel, String parameterName, String newLevel,
