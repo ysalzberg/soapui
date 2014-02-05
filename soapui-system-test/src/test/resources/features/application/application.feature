@@ -1,4 +1,4 @@
-@Automated @Regression
+@Manual @Regression
 Feature: Application
 
   Scenario: The main window is showing up without error when starting up SoapUI

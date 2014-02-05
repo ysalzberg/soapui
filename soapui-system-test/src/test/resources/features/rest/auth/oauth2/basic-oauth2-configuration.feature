@@ -1,4 +1,4 @@
-@Automated @Acceptance
+@Manual @Acceptance
 Feature: Basic OAuth 2 configuration
 
   Scenario: Request editor not supporting OAuth show not show it in the Auth dropdown
