@@ -172,7 +172,7 @@ public final class RestProjectUtils
 		robot.waitForIdle();
 		JTextField tableCellEditor = ( JTextField )table.cell( row( row ).column( column ) ).editor();
 		new JTextComponentFixture( robot, tableCellEditor )
-				.setText( paramValue )
-				.pressAndReleaseKey( KeyPressInfo.keyCode( KeyEvent.VK_ENTER ) );
+				.setText( paramValue );
+		robot.pressAndReleaseKey( KeyEvent.VK_ENTER );
 	}
 }
