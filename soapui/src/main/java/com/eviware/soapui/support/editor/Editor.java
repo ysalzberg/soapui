@@ -14,6 +14,7 @@ package com.eviware.soapui.support.editor;
 
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.components.*;
+import com.eviware.soapui.support.editor.views.xml.source.XmlSourceEditorView;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 
 @SuppressWarnings( "serial" )
-public class Editor<T extends EditorDocument> extends JPanel implements PropertyChangeListener,
+public abstract class Editor<T extends EditorDocument> extends JPanel implements PropertyChangeListener,
 		EditorLocationListener<T>
 {
 	private JTabbedPane inputTabs;
@@ -297,4 +298,6 @@ public class Editor<T extends EditorDocument> extends JPanel implements Property
 		inspectorPanel.release();
 		document.release();
 	}
+
+	public abstract EditorView getSourceEditor();
 }

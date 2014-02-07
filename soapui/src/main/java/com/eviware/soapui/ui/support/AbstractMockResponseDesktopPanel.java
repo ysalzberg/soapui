@@ -34,8 +34,10 @@ import com.eviware.soapui.support.action.swing.SwingActionDelegate;
 import com.eviware.soapui.support.actions.ChangeSplitPaneOrientationAction;
 import com.eviware.soapui.support.components.JEditorStatusBarWithProgress;
 import com.eviware.soapui.support.components.JXToolBar;
+import com.eviware.soapui.support.editor.Editor;
 import com.eviware.soapui.support.editor.views.xml.source.XmlSourceEditorView;
 import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.XmlEditor;
 import com.eviware.soapui.support.swing.SoapUISplitPaneUI;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -54,19 +56,19 @@ import java.beans.PropertyChangeListener;
  * @author Ole.Matzura
  */
 
-public class AbstractMockResponseDesktopPanel<ModelItemType extends ModelItem, MockResponseType extends MockResponse> extends
-		ModelItemDesktopPanel<ModelItemType>
+public class AbstractMockResponseDesktopPanel<ModelItemType extends ModelItem,
+			MockResponseType extends MockResponse>
+		extends ModelItemDesktopPanel<ModelItemType>
 {
 	private JEditorStatusBarWithProgress statusBar;
 	private JButton splitButton;
-	private MockRunner mockRunner;
 	private JButton recreateButton;
 	private JSplitPane requestSplitPane;
 	private MoveFocusAction moveFocusAction;
 	private ClosePanelAction closePanelAction = new ClosePanelAction();
 
-	private ModelItemXmlEditor<?, ?> requestEditor;
-	private ModelItemXmlEditor<?, ?> responseEditor;
+	private Editor<?> requestEditor;
+	private Editor<?> responseEditor;
 
 	private JTabbedPane requestTabs;
 	private JPanel requestTabPanel;
@@ -127,19 +129,14 @@ public class AbstractMockResponseDesktopPanel<ModelItemType extends ModelItem, M
 		return mockResponse;
 	}
 
-	public final ModelItemXmlEditor<?, ?> getRequestEditor()
+	public final Editor<?> getRequestEditor()
 	{
 		return requestEditor;
 	}
 
-	public final ModelItemXmlEditor<?, ?> getResponseEditor()
+	public final Editor<?> getResponseEditor()
 	{
 		return responseEditor;
-	}
-
-	public MockRunner getSubmit()
-	{
-		return mockRunner;
 	}
 
 	protected JComponent buildStatusLabel()
@@ -212,12 +209,12 @@ public class AbstractMockResponseDesktopPanel<ModelItemType extends ModelItem, M
 		return true;
 	}
 
-	protected ModelItemXmlEditor<?, ?> buildResponseEditor()
+	protected Editor<?> buildResponseEditor()
 	{
 		return new MockResponseMessageEditor( new MockResponseXmlDocument( mockResponse ) );
 	}
 
-	protected ModelItemXmlEditor<?, ?> buildRequestEditor()
+	protected Editor<?> buildRequestEditor()
 	{
 		return new MockRequestMessageEditor( new MockRequestXmlDocument( mockResponse ) );
 	}
@@ -266,11 +263,15 @@ public class AbstractMockResponseDesktopPanel<ModelItemType extends ModelItem, M
 	{
 		public void propertyChange( PropertyChangeEvent evt )
 		{
-			if( evt.getPropertyName().equals( WsdlMockResponse.MOCKRESULT_PROPERTY ) )
+			if( evt.getPropertyName().equals( WsdlMockResponse.MOCKRESULT_PROPERTY )  )
 			{
 				MockResult mockResult = mockResponse.getMockResult();
 				MockRequest mockRequest = mockResult == null ? null : mockResult.getMockRequest();
-				requestEditor.getDocument().setXml( mockRequest == null ? "" : mockRequest.getRequestContent() );
+				if( requestEditor.getDocument() instanceof XmlDocument )
+				{
+					String newContent = mockRequest == null ? "" : mockRequest.getRequestContent();
+					((XmlDocument)requestEditor.getDocument()).setXml( newContent );
+				}
 			}
 		}
 	}
