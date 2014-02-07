@@ -122,8 +122,6 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 
 	public void setResponseHttpStatus( String httpStatus )
 	{
-		String oldStatus = getResponseHttpStatus();
-
 		getConfig().setHttpResponseStatus( httpStatus );
 	}
 
@@ -362,7 +360,7 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 
 			if( !response.getResponseHeaders().containsKeyIgnoreCase( "Content-Type" ) )
 			{
-				response.setContentType( getContentType( operation, encoding ) );
+				response.setContentType( getContentType( ) );
 			}
 
 			String acceptEncoding = response.getMockRequest().getRequestHeaders().get( "Accept-Encoding", "" );
@@ -423,8 +421,6 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 
 		return responseContent;
 	}
-
-	protected abstract String getContentType( Operation operation, String encoding );
 
 	private void initRootPart( String requestContent, MimeMultipart mp, boolean isXOP ) throws MessagingException
 	{
@@ -513,5 +509,19 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 	{
 		return propertyHolder.getPropertyList();
 	}
+
+	public String getEncoding()
+	{
+		return getConfig().getEncoding();
+	}
+
+	public void setEncoding( String encoding )
+	{
+		String old = getEncoding();
+		getConfig().setEncoding( encoding );
+		notifyPropertyChanged( ENCODING_PROPERTY, old, encoding );
+	}
+
+
 
 }

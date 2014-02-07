@@ -32,6 +32,8 @@ public interface MockResponse extends TestModelItem
 
 	public void setResponseContent( String responseContent );
 
+	public String getContentType();
+
 	public String getEncoding();
 
 	public boolean isMtomEnabled();

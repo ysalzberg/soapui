@@ -2,6 +2,8 @@ package com.eviware.soapui.impl.rest.mock;
 
 
 import com.eviware.soapui.config.RESTMockResponseConfig;
+import com.eviware.soapui.impl.rest.RestRequestInterface;
+import com.eviware.soapui.impl.rest.support.handlers.JsonMediaTypeHandler;
 import com.eviware.soapui.impl.support.AbstractMockResponse;
 import com.eviware.soapui.impl.wsdl.mock.WsdlMockRequest;
 import com.eviware.soapui.impl.wsdl.mock.WsdlMockRunContext;
@@ -26,9 +28,6 @@ import java.util.Map;
 
 public class RestMockResponse extends AbstractMockResponse<RESTMockResponseConfig>
 {
-
-	private String responseContent;
-	private RestMockResult mockResult;
 	public final static String MOCKRESULT_PROPERTY = RestMockResponse.class.getName() + "@mockresult";
 
 	public RestMockResponse( RestMockAction action, RESTMockResponseConfig config )
@@ -84,10 +83,16 @@ public class RestMockResponse extends AbstractMockResponse<RESTMockResponseConfi
 		return false;
 	}
 
-	@Override
 	public String getEncoding()
 	{
-		return null;
+		return getConfig().getEncoding();
+	}
+
+	public void setEncoding( String encoding )
+	{
+		String old = getEncoding();
+		getConfig().setEncoding( encoding );
+		notifyPropertyChanged( ENCODING_PROPERTY, old, encoding );
 	}
 
 	@Override
@@ -162,13 +167,11 @@ public class RestMockResponse extends AbstractMockResponse<RESTMockResponseConfi
 	}
 
 	@Override
-	protected String getContentType( Operation operation, String encoding )
+	public String getContentType( )
 	{
-		//TODO as part of SOAP-1260
-		String contentType = "application/xml";
-		if( encoding != null && encoding.trim().length() > 0 )
-			contentType += ";charset=" + encoding;
-		return contentType;
+		if( getEncoding() != null)
+			return getMimeType() + "; " + getEncoding();
+		return getMimeType();
 	}
 
 	@Override
@@ -201,4 +204,33 @@ public class RestMockResponse extends AbstractMockResponse<RESTMockResponseConfi
 		return false;
 	}
 
+	public String getMimeType()
+	{
+		return getConfig().isSetMimeType() ? getConfig().getMimeType() : RestRequestInterface.DEFAULT_MEDIATYPE;
+	}
+
+	public void setContentType( String contentType )
+	{
+		String[] parts = contentType.split( ";", 2 );
+		getConfig().setMimeType( parts[0] );
+
+		if( parts.length > 1 && parts[1].trim().startsWith( "charset=" ))
+		{
+			String[] encodingParts = parts[1].split( "=" );
+			if( encodingParts.length > 1)
+			{
+				setEncoding( encodingParts[1] );
+			}
+		}
+	}
+
+	public boolean isXml()
+	{
+		return getMimeType().trim().equals( "application/xml" );
+	}
+
+	public boolean isJson()
+	{
+		return JsonMediaTypeHandler.seemsToBeJsonContentType( getMimeType() );
+	}
 }
