@@ -20,7 +20,8 @@ import com.eviware.soapui.impl.support.http.HttpRequestInterface;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.HttpResponse;
 import com.eviware.soapui.model.ModelItem;
 import com.eviware.soapui.support.StringUtils;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
+import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import com.eviware.soapui.support.xml.XmlUtils;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
@@ -71,7 +72,7 @@ public abstract class AbstractHttpXmlRequestDesktopPanel<T extends ModelItem, T2
 		}
 	}
 
-	public static class HttpRequestDocument extends AbstractXmlDocument implements PropertyChangeListener
+	public static class HttpRequestDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 	{
 		private final HttpRequestInterface<?> request;
 		private boolean updating;
@@ -191,7 +192,7 @@ public abstract class AbstractHttpXmlRequestDesktopPanel<T extends ModelItem, T2
 		}
 	}
 
-	public static class HttpResponseDocument extends AbstractXmlDocument implements PropertyChangeListener
+	public static class HttpResponseDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 	{
 		private final HttpRequestInterface<?> modelItem;
 

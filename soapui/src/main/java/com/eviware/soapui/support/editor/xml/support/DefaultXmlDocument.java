@@ -12,6 +12,7 @@
 
 package com.eviware.soapui.support.editor.xml.support;
 
+import com.eviware.soapui.support.editor.xml.XmlDocument;
 import org.apache.xmlbeans.SchemaTypeSystem;
 import org.apache.xmlbeans.XmlBeans;
 
@@ -23,7 +24,7 @@ import com.eviware.soapui.support.xml.XmlUtils;
  * @author ole.matzura
  */
 
-public class DefaultXmlDocument extends AbstractXmlDocument
+public class DefaultXmlDocument extends AbstractEditorDocument implements XmlDocument
 {
 	private String xml;
 	private SchemaTypeSystem typeSystem;

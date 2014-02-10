@@ -13,6 +13,7 @@
 package com.eviware.soapui.impl.rest.panels.request.views.json;
 
 import com.eviware.soapui.impl.support.http.HttpRequestInterface;
+import com.eviware.soapui.impl.support.panels.AbstractHttpXmlRequestDesktopPanel;
 import com.eviware.soapui.impl.support.panels.AbstractHttpXmlRequestDesktopPanel.HttpResponseMessageEditor;
 import com.eviware.soapui.impl.wsdl.support.MessageExchangeModelItem;
 import com.eviware.soapui.impl.wsdl.support.MessageExchangeResponseMessageEditor;
@@ -28,7 +29,7 @@ public class JsonResponseViewFactory implements ResponseEditorViewFactory
 	@SuppressWarnings( "unchecked" )
 	public EditorView<?> createResponseEditorView( Editor<?> editor, ModelItem modelItem )
 	{
-		if( editor instanceof HttpResponseMessageEditor && modelItem instanceof HttpRequestInterface<?> )
+		if( editor instanceof AbstractHttpXmlRequestDesktopPanel.HttpResponseMessageEditor && modelItem instanceof HttpRequestInterface<?> )
 		{
 			return new JsonResponseView( ( HttpResponseMessageEditor )editor, ( HttpRequestInterface<?> )modelItem );
 		}

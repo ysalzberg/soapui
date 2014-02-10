@@ -170,6 +170,7 @@ import java.util.prefs.BackingStoreException;
 public class SoapUI
 {
 	// ------------------------------ CONSTANTS ------------------------------
+
 	public static final String DEFAULT_DESKTOP = "Default";
 	public static final String CURRENT_SOAPUI_WORKSPACE = SoapUI.class.getName() + "@workspace";
 	public final static Logger log = Logger.getLogger( SoapUI.class );

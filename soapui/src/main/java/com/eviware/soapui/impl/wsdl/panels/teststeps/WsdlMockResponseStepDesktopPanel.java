@@ -33,6 +33,7 @@ import com.eviware.soapui.support.components.JComponentInspector;
 import com.eviware.soapui.support.components.JInspectorPanel;
 import com.eviware.soapui.support.components.JInspectorPanelFactory;
 import com.eviware.soapui.support.components.JXToolBar;
+import com.eviware.soapui.support.editor.Editor;
 import com.eviware.soapui.support.xml.XmlUtils;
 
 import javax.swing.*;
@@ -253,7 +254,7 @@ public class WsdlMockResponseStepDesktopPanel extends AbstractWsdlMockResponseDe
 		{
 			protected void selectError( AssertionError error )
 			{
-				ModelItemXmlEditor<?, ?> editor = getResponseEditor();
+				Editor<?> editor = getResponseEditor();
 				editor.requestFocus();
 			}
 		};

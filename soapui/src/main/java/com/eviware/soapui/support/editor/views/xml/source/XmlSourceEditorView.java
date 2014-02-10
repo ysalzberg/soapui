@@ -94,7 +94,7 @@ import com.jgoodies.forms.builder.ButtonBarBuilder;
 
 public class XmlSourceEditorView<T extends ModelItem> extends AbstractXmlEditorView<XmlDocument>
 {
-	private static final String RSYNTAXAREA_THEME = "/rsyntaxarea-theme/soapui.xml";
+	public static final String RSYNTAXAREA_THEME = "/rsyntaxarea-theme/soapui.xml";
 
 	private RSyntaxTextArea editArea;
 	private RTextScrollPane editorScrollPane;

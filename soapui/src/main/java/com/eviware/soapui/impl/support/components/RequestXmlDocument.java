@@ -15,6 +15,8 @@ package com.eviware.soapui.impl.support.components;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import org.apache.xmlbeans.SchemaTypeSystem;
 import org.apache.xmlbeans.XmlBeans;
 
@@ -22,7 +24,6 @@ import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.support.wsdl.WsdlContext;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
 
 /**
  * XmlDocument for a WsdlRequest
@@ -30,7 +31,7 @@ import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
  * @author ole.matzura
  */
 
-public class RequestXmlDocument extends AbstractXmlDocument implements PropertyChangeListener
+public class RequestXmlDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 {
 	private final WsdlRequest request;
 	private boolean updating;

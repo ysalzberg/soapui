@@ -83,18 +83,6 @@ public class RestMockResponse extends AbstractMockResponse<RESTMockResponseConfi
 		return false;
 	}
 
-	public String getEncoding()
-	{
-		return getConfig().getEncoding();
-	}
-
-	public void setEncoding( String encoding )
-	{
-		String old = getEncoding();
-		getConfig().setEncoding( encoding );
-		notifyPropertyChanged( ENCODING_PROPERTY, old, encoding );
-	}
-
 	@Override
 	public boolean isMtomEnabled()
 	{

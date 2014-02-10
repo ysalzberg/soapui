@@ -14,8 +14,6 @@ package com.eviware.soapui.support.editor;
 
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.components.*;
-import com.eviware.soapui.support.editor.views.xml.source.XmlSourceEditorView;
-
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -299,5 +297,8 @@ public abstract class Editor<T extends EditorDocument> extends JPanel implements
 		document.release();
 	}
 
-	public abstract EditorView getSourceEditor();
+	public EditorView getSourceEditor()
+	{
+		return null;
+	}
 }

@@ -15,6 +15,7 @@ package com.eviware.soapui.support.editor.xml.support;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import com.eviware.soapui.support.editor.EditorDocument;
 import org.apache.xmlbeans.SchemaTypeSystem;
 import org.apache.xmlbeans.XmlBeans;
 
@@ -26,7 +27,7 @@ import com.eviware.soapui.support.editor.xml.XmlDocument;
  * @author ole.matzura
  */
 
-public abstract class AbstractXmlDocument implements XmlDocument
+public abstract class AbstractEditorDocument implements EditorDocument
 {
 	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport( this );
 
@@ -52,7 +53,7 @@ public abstract class AbstractXmlDocument implements XmlDocument
 
 	protected void fireXmlChanged( String oldValue, String newValue )
 	{
-		propertyChangeSupport.firePropertyChange( XML_PROPERTY, oldValue, newValue );
+		propertyChangeSupport.firePropertyChange( XmlDocument.XML_PROPERTY, oldValue, newValue );
 	}
 
 	public void release()

@@ -42,7 +42,8 @@ import com.eviware.soapui.settings.UISettings;
 import com.eviware.soapui.support.*;
 import com.eviware.soapui.support.actions.ChangeSplitPaneOrientationAction;
 import com.eviware.soapui.support.components.*;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
+import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import com.eviware.soapui.support.jdbc.JdbcUtils;
 import com.eviware.soapui.support.log.JLogList;
 import com.eviware.soapui.support.propertyexpansion.PropertyExpansionPopupListener;
@@ -55,12 +56,8 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -604,7 +601,7 @@ public class JdbcRequestTestStepDesktopPanel extends ModelItemDesktopPanel<JdbcR
 		return release();
 	}
 
-	public class JdbcResponseDocument extends AbstractXmlDocument implements PropertyChangeListener
+	public class JdbcResponseDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 	{
 		public JdbcResponseDocument()
 		{

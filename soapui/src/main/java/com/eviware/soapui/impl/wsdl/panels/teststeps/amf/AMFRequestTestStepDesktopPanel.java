@@ -50,7 +50,8 @@ import com.eviware.soapui.support.components.*;
 import com.eviware.soapui.support.editor.Editor;
 import com.eviware.soapui.support.editor.EditorView;
 import com.eviware.soapui.support.editor.support.AbstractEditorView;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
+import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import com.eviware.soapui.support.propertyexpansion.PropertyExpansionPopupListener;
 import com.eviware.soapui.support.scripting.SoapUIScriptEngine;
 import com.eviware.soapui.support.scripting.SoapUIScriptEngineRegistry;
@@ -635,7 +636,7 @@ public class AMFRequestTestStepDesktopPanel extends ModelItemDesktopPanel<AMFReq
 		return release();
 	}
 
-	public class AMFResponseDocument extends AbstractXmlDocument implements PropertyChangeListener
+	public class AMFResponseDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 	{
 		public AMFResponseDocument()
 		{
@@ -667,7 +668,7 @@ public class AMFRequestTestStepDesktopPanel extends ModelItemDesktopPanel<AMFReq
 		}
 	}
 
-	public class AMFRequestDocument extends AbstractXmlDocument implements PropertyChangeListener
+	public class AMFRequestDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 	{
 		public AMFRequestDocument()
 		{

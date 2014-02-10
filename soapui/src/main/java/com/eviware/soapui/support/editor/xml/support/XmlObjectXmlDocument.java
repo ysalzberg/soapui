@@ -25,7 +25,7 @@ import com.eviware.soapui.support.xml.XmlUtils;
  * @author ole.matzura
  */
 
-public class XmlObjectXmlDocument extends AbstractXmlDocument
+public class XmlObjectXmlDocument extends AbstractEditorDocument
 {
 	private XmlObject xmlObject;
 

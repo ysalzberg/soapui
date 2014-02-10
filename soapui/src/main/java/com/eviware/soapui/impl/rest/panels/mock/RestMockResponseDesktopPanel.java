@@ -1,16 +1,27 @@
 package com.eviware.soapui.impl.rest.panels.mock;
 
 import com.eviware.soapui.impl.rest.mock.RestMockResponse;
+import com.eviware.soapui.impl.wsdl.panels.mockoperation.MockResponseXmlDocument;
+import com.eviware.soapui.support.editor.Editor;
 import com.eviware.soapui.ui.support.AbstractMockResponseDesktopPanel;
-import com.eviware.soapui.model.mock.MockResponse;
 
 public class RestMockResponseDesktopPanel extends
-		AbstractMockResponseDesktopPanel<RestMockResponse, MockResponse>
+		AbstractMockResponseDesktopPanel<RestMockResponse, RestMockResponse>
 {
-	public RestMockResponseDesktopPanel( MockResponse mockResponse )
+	public RestMockResponseDesktopPanel( RestMockResponse mockResponse )
 	{
-		super( ( RestMockResponse )mockResponse );
+		super( mockResponse );
 
 		init( mockResponse );
+	}
+
+	protected Editor<?> buildResponseEditor()
+	{
+		RestMockResponse mockResponse = getMockResponse();
+		if( mockResponse.isJson())
+		{
+			return  new RestMockResponseJsonMessageEditor( new RestMockResponseJsonDocument( mockResponse ), mockResponse );
+		}
+		return new MockResponseMessageEditor( new MockResponseXmlDocument( mockResponse ) );
 	}
 }

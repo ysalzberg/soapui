@@ -16,6 +16,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import com.eviware.soapui.model.mock.MockResponse;
+import com.eviware.soapui.support.editor.xml.XmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import org.apache.xmlbeans.SchemaTypeSystem;
 import org.apache.xmlbeans.XmlBeans;
 
@@ -24,7 +26,6 @@ import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.mock.WsdlMockResponse;
 import com.eviware.soapui.impl.wsdl.support.wsdl.WsdlContext;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
 
 /**
  * XmlDocument for a WsdlMockResponse
@@ -32,7 +33,7 @@ import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
  * @author ole.matzura
  */
 
-public class MockResponseXmlDocument extends AbstractXmlDocument implements PropertyChangeListener
+public class MockResponseXmlDocument extends AbstractEditorDocument implements XmlDocument, PropertyChangeListener
 {
 	private final MockResponse mockResponse;
 

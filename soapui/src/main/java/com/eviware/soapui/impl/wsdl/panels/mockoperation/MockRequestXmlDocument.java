@@ -20,7 +20,7 @@ import com.eviware.soapui.impl.wsdl.support.wsdl.WsdlContext;
 import com.eviware.soapui.model.mock.MockResponse;
 import com.eviware.soapui.model.mock.MockResult;
 import com.eviware.soapui.support.editor.xml.XmlDocument;
-import com.eviware.soapui.support.editor.xml.support.AbstractXmlDocument;
+import com.eviware.soapui.support.editor.xml.support.AbstractEditorDocument;
 import org.apache.xmlbeans.SchemaTypeSystem;
 import org.apache.xmlbeans.XmlBeans;
 
@@ -30,7 +30,7 @@ import org.apache.xmlbeans.XmlBeans;
  * @author ole.matzura
  */
 
-public class MockRequestXmlDocument extends AbstractXmlDocument implements XmlDocument
+public class MockRequestXmlDocument extends AbstractEditorDocument implements XmlDocument
 {
 	private final MockResponse mockResponse;
 
