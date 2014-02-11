@@ -16,10 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -31,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.eviware.soapui.impl.wsdl.monitor.SoapMonitorListenerCallBack;
+import com.eviware.soapui.impl.wsdl.support.http.ProxyUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpVersion;
@@ -46,7 +44,6 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.actions.monitor.SoapMonitorAction;
 import com.eviware.soapui.impl.wsdl.actions.monitor.SoapMonitorAction.LaunchForm;
 import com.eviware.soapui.impl.wsdl.monitor.JProxyServletWsdlMonitorMessageExchange;
-import com.eviware.soapui.impl.wsdl.monitor.SoapMonitor;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.ExtendedHttpMethod;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedGetMethod;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.methods.ExtendedHeadMethod;
@@ -230,6 +227,7 @@ public class ProxyServlet implements Servlet
 
 		method.getParams().setParameter( ClientPNames.HANDLE_REDIRECTS, false );
 		setProtocolversion( method, request.getProtocol() );
+		ProxyUtils.setForceDirectConnection( method.getParams() );
 		listenerCallBack.fireBeforeProxy( project, request, response, method );
 
 		if( settings.getBoolean( LaunchForm.SSLTUNNEL_REUSESTATE ) )
@@ -269,10 +267,10 @@ public class ProxyServlet implements Servlet
 
 			// copy headers to response
 			HttpServletResponse httpServletResponse = ( HttpServletResponse )response;
-			for( String name : responseHeaders.keySet() )
+			for( Map.Entry<String, List<String>> headerEntry : responseHeaders.entrySet() )
 			{
-				for( String header : responseHeaders.get( name ) )
-					httpServletResponse.addHeader( name, header );
+				for( String header : headerEntry.getValue() )
+					httpServletResponse.addHeader( headerEntry.getKey(), header );
 			}
 
 			IO.copy( new ByteArrayInputStream( capturedData.getRawResponseBody() ), httpServletResponse.getOutputStream() );
