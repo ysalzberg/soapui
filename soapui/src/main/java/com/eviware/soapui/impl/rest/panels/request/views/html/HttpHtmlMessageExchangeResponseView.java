@@ -12,7 +12,7 @@
 
 package com.eviware.soapui.impl.rest.panels.request.views.html;
 
-import com.eviware.soapui.impl.support.panels.AbstractHttpXmlRequestDesktopPanel;
+import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.support.panels.AbstractHttpXmlRequestDesktopPanel.HttpResponseDocument;
 import com.eviware.soapui.impl.wsdl.monitor.JProxyServletWsdlMonitorMessageExchange;
 import com.eviware.soapui.impl.wsdl.support.MessageExchangeModelItem;
@@ -44,7 +44,7 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 	private final MessageExchangeModelItem messageExchangeModelItem;
 	private JPanel panel;
 	private WebViewBasedBrowserComponent browser;
-	private JPanel contentPanel;
+	private JPanel contentPanel = new JPanel( new BorderLayout() );
 
 	public HttpHtmlMessageExchangeResponseView( XmlEditor editor, MessageExchangeModelItem messageExchangeModelItem )
 	{
@@ -74,7 +74,9 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 		super.release();
 
 		if( browser != null )
+		{
 			browser.release();
+		}
 
 		messageExchangeModelItem.removePropertyChangeListener( this );
 	}
@@ -88,8 +90,6 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 
 	private Component buildContent()
 	{
-		contentPanel = new JPanel( new BorderLayout() );
-
 		return contentPanel;
 	}
 
@@ -99,11 +99,21 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 		boolean activated = super.activate( location );
 		if(activated){
 			if(browser == null){
-				browser = new WebViewBasedBrowserComponent( false );
-				Component component = browser.getComponent();
-				component.setMinimumSize( new Dimension( 100, 100 ) );
-				contentPanel.add( new JScrollPane( component ) );
-					}
+				if( SoapUI.isBrowserDisabled() )
+				{
+					contentPanel.add( new JLabel( "Browser Component is disabled" ) );
+				}
+				else
+				{
+					browser = new WebViewBasedBrowserComponent( false );
+					Component component = browser.getComponent();
+					component.setMinimumSize( new Dimension( 100, 100 ) );
+					contentPanel.add( new JScrollPane( component ) );
+
+					setEditorContent( messageExchangeModelItem );
+				}
+			}
+			
 			setEditorContent( messageExchangeModelItem );
 		}
 		return activated;
@@ -129,8 +139,9 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 			{
 				try
 				{
+
 					String content = jproxyServletWsdlMonitorMessageExchange.getResponseContent();
-					browser.setContent( content, contentType );
+					browser.setContent( content );
 				}
 				catch( Exception e )
 				{

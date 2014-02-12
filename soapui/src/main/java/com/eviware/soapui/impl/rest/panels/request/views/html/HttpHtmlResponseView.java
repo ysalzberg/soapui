@@ -23,8 +23,7 @@ import com.eviware.soapui.support.components.WebViewBasedBrowserComponent;
 import com.eviware.soapui.support.editor.EditorLocation;
 import com.eviware.soapui.support.editor.views.AbstractXmlEditorView;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -36,10 +35,12 @@ import java.util.regex.Pattern;
 @SuppressWarnings( "unchecked" )
 public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocument> implements PropertyChangeListener
 {
+	public static final String CHARSET_PATTERN = "(.+)(;\\s*charset=)(.+)";
 	private HttpRequestInterface<?> httpRequest;
-	private JPanel panel;
+	private JPanel panel = new JPanel( new BorderLayout() );
 	private WebViewBasedBrowserComponent browser;
 	private MessageExchangeModelItem messageExchangeModelItem;
+	private Pattern charsetFinderPattern = Pattern.compile( CHARSET_PATTERN );
 
 	public HttpHtmlResponseView( HttpResponseMessageEditor httpRequestMessageEditor, HttpRequestInterface<?> httpRequest )
 	{
@@ -50,12 +51,6 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 
 	public JComponent getComponent()
 	{
-		if( panel == null )
-		{
-			panel = new JPanel( new BorderLayout() );
-
-		}
-
 		return panel;
 	}
 
@@ -92,7 +87,7 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 		}
 		return deactivated;
 	}
-
+	
 	@Override
 	public void release()
 	{
@@ -125,7 +120,7 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 			{
 				try
 				{
-					browser.setContent( content, contentType);
+					browser.setContent( content, removeCharsetFrom( contentType ) );
 				}
 				catch( Exception e )
 				{
@@ -143,7 +138,11 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 		}
 	}
 
-
+	private String removeCharsetFrom( String contentType )
+	{
+		Matcher matcher = charsetFinderPattern.matcher( contentType );
+		return matcher.matches() ? matcher.group( 1 ) : contentType;
+	}
 
 	private boolean isSupportedContentType( String contentType )
 	{
