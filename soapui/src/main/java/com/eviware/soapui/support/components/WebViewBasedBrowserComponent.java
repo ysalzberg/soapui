@@ -50,9 +50,15 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WebViewBasedBrowserComponent
 {
+
+	public static final String CHARSET_PATTERN = "(.+)(;\\s*charset=)(.+)";
+	private Pattern charsetFinderPattern = Pattern.compile( CHARSET_PATTERN );
+
 	private JPanel panel = new JPanel( new BorderLayout() );
 	private String errorPage;
 	private boolean showingErrorPage;
@@ -90,6 +96,20 @@ public class WebViewBasedBrowserComponent
 				public void run()
 				{
 					webView = new WebView();
+
+					webView.getEngine().locationProperty().addListener( new ChangeListener<String>()
+					{
+						@Override
+						public void changed( ObservableValue<? extends String> observableValue, String oldLocation,
+													String newLocation )
+						{
+							for( BrowserStateChangeListener listener : listeners )
+							{
+								listener.locationChanged( newLocation );
+							}
+						}
+					} );
+
 					webView.getEngine().getLoadWorker().stateProperty().addListener(
 							new ChangeListener<Worker.State>()
 							{
@@ -100,12 +120,6 @@ public class WebViewBasedBrowserComponent
 									{
 										try
 										{
-											String location = getWebEngine().getLocation();
-											for( BrowserStateChangeListener listener : listeners )
-											{
-												listener.locationChanged( location );
-											}
-
 											if( getWebEngine().getDocument() != null )
 											{
 												String output = readDocumentAsString();
@@ -227,14 +241,21 @@ public class WebViewBasedBrowserComponent
 
 	public void setContent( final String contentAsString, final String contentType )
 	{
+
 		Platform.runLater( new Runnable()
 		{
 			public void run()
 			{
 
-				getWebEngine().loadContent( contentAsString, contentType);
+				getWebEngine().loadContent( contentAsString, removeCharsetFrom(contentType));
 			}
 		} );
+	}
+
+	private String removeCharsetFrom( String contentType )
+	{
+		Matcher matcher = charsetFinderPattern.matcher( contentType );
+		return matcher.matches() ? matcher.group(1) : contentType;
 	}
 
 	public void setContent( final String contentAsString )
