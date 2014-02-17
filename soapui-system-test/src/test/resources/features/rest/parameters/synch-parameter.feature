@@ -1,6 +1,8 @@
 @Automated @Regression
 Feature: REST request parameter synchronization across REST request, method and resource
 
+#  TODO resource and method level parameter added in the request view, see the syn between views, editors and top URI bar
+#  TODO extract parameter from uri, get method level as default
   Scenario: By default a parameter is added to RESOURCE level and it is synchronized between request editor and
   resource editor
     Given SoapUI is started
@@ -37,9 +39,3 @@ Feature: REST request parameter synchronization across REST request, method and 
     And resource editor has parameter with name reqParam and with empty value at row 0
     And resource editor has parameter with name methodParam and value methodParamValue at row 1
     And close SoapUI
-
-#  (1. request level parameter extract and add in request view)
-#  2. resource and method level parameter added in the request view, see the syn between views, editors and top URI bar
-#  3. resource and method level parameter added in their editors, see the syn between views, editors and top URI bar
-#  4. add parameter in request editor, get resource level as default
-#  5. extract parameter from uri, get method level as default
