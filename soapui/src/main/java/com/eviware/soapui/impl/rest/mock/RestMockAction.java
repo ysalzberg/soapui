@@ -2,8 +2,8 @@ package com.eviware.soapui.impl.rest.mock;
 
 import com.eviware.soapui.config.RESTMockActionConfig;
 import com.eviware.soapui.config.RESTMockResponseConfig;
+import com.eviware.soapui.impl.rest.HttpMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
-import com.eviware.soapui.impl.rest.RestRequestInterface.RequestMethod;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.support.AbstractMockOperation;
 import com.eviware.soapui.impl.wsdl.mock.DispatchException;
@@ -70,16 +70,19 @@ public class RestMockAction extends AbstractMockOperation<RESTMockActionConfig, 
 
 	}
 
-	public RestMockResponse addNewMockResponse( RESTMockResponseConfig responseConfig )
+	public RestMockResponse addNewMockResponse( String name )
 	{
-		RestMockResponse mockResponse = new RestMockResponse( this, responseConfig );
 
+		RESTMockResponseConfig restMockResponseConfig = getConfig().addNewResponse();
+		restMockResponseConfig.setName( name );
+
+		RestMockResponse mockResponse = new RestMockResponse( this, restMockResponseConfig );
 		addMockResponse( mockResponse );
 
 
-		if( getMockResponseCount() == 1 && responseConfig.getResponseContent() != null )
+		if( getMockResponseCount() == 1 && restMockResponseConfig.getResponseContent() != null )
 		{
-			setDefaultResponse( responseConfig.getResponseContent().toString() );
+			setDefaultResponse( restMockResponseConfig.getResponseContent().toString() );
 		}
 
 		( getMockService() ).fireMockResponseAdded( mockResponse );
@@ -118,10 +121,7 @@ public class RestMockAction extends AbstractMockOperation<RESTMockActionConfig, 
 		}
 		catch( Throwable e )
 		{
-			if( e instanceof DispatchException )
-				throw ( DispatchException )e;
-			else
-				throw new DispatchException( e );
+			throw new DispatchException( e );
 		}
 	}
 
@@ -130,8 +130,8 @@ public class RestMockAction extends AbstractMockOperation<RESTMockActionConfig, 
 		return getConfig().getResourcePath();
 	}
 
-	public RequestMethod getMethod()
+	public HttpMethod getMethod()
 	{
-		return RequestMethod.valueOf( getConfig().getMethod() );
+		return HttpMethod.valueOf( getConfig().getMethod() );
 	}
 }

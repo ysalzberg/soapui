@@ -823,12 +823,7 @@ public class SoapUI
 
 		frame = new JFrame( title );
 
-		List<Image> iconList = new ArrayList<Image>();
-		for( String iconPath : FRAME_ICON.split( ";" ) )
-		{
-			iconList.add( UISupport.createImageIcon( iconPath ).getImage() );
-		}
-		frame.setIconImages( iconList );
+        frame.setIconImages(getFrameIcons());
 
 		JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled( false );
@@ -905,7 +900,16 @@ public class SoapUI
 		return soapUI;
 	}
 
-	private static boolean processCommandLineArgs( CommandLine cmd )
+    public static List<Image> getFrameIcons() {
+        List<Image> iconList = new ArrayList<Image>();
+        for( String iconPath : FRAME_ICON.split( ";" ) )
+        {
+            iconList.add( UISupport.createImageIcon(iconPath).getImage() );
+        }
+        return iconList;
+    }
+
+    private static boolean processCommandLineArgs( CommandLine cmd )
 	{
 		if( cmd.hasOption( 'w' ) )
 		{

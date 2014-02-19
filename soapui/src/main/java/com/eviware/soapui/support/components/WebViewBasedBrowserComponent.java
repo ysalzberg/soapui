@@ -46,7 +46,6 @@ import java.util.regex.Pattern;
 
 public class WebViewBasedBrowserComponent
 {
-
 	public static final String CHARSET_PATTERN = "(.+)(;\\s*charset=)(.+)";
 	private Pattern charsetFinderPattern = Pattern.compile( CHARSET_PATTERN );
 
@@ -62,7 +61,6 @@ public class WebViewBasedBrowserComponent
 
 	public WebViewBasedBrowserComponent( boolean addStatusBar )
 	{
-		panel = new JPanel( new BorderLayout() );
 		if( SoapUI.isBrowserDisabled() )
 		{
 			JEditorPane browserDisabledPanel = new JEditorPane();
@@ -71,7 +69,7 @@ public class WebViewBasedBrowserComponent
 		}
 		else
 		{
-			initializeWebView(addStatusBar);
+			initializeWebView( addStatusBar );
 		}
 	}
 
@@ -98,46 +96,46 @@ public class WebViewBasedBrowserComponent
 		{
 			public void run()
 			{
-					webView = new WebView();
+				webView = new WebView();
 
-					webView.getEngine().locationProperty().addListener( new ChangeListener<String>()
+				webView.getEngine().locationProperty().addListener( new ChangeListener<String>()
+				{
+					@Override
+					public void changed( ObservableValue<? extends String> observableValue, String oldLocation,
+												String newLocation )
 					{
-						@Override
-						public void changed( ObservableValue<? extends String> observableValue, String oldLocation,
-													String newLocation )
+						for( BrowserStateChangeListener listener : listeners )
 						{
-							for( BrowserStateChangeListener listener : listeners )
-							{
-								listener.locationChanged( newLocation );
-							}
+							listener.locationChanged( newLocation );
 						}
-					} );
+					}
+				} );
 
-					webView.getEngine().getLoadWorker().stateProperty().addListener(
-							new ChangeListener<Worker.State>()
+				webView.getEngine().getLoadWorker().stateProperty().addListener(
+						new ChangeListener<Worker.State>()
+						{
+							@Override
+							public void changed( ObservableValue ov, Worker.State oldState, Worker.State newState )
 							{
-								@Override
-								public void changed( ObservableValue ov, Worker.State oldState, Worker.State newState )
+								if( newState == Worker.State.SUCCEEDED )
 								{
-									if( newState == Worker.State.SUCCEEDED )
+									try
 									{
-										try
+										if( getWebEngine().getDocument() != null )
 										{
-											if( getWebEngine().getDocument() != null )
+											String output = readDocumentAsString();
+											for( BrowserStateChangeListener listener : listeners )
 											{
-												String output = readDocumentAsString();
-												for( BrowserStateChangeListener listener : listeners )
-												{
-													listener.contentChanged( output );
-												}
+												listener.contentChanged( output );
 											}
 										}
-										catch( Exception ex )
-										{
-											SoapUI.logError( ex, "Error processing state change to " + newState );
-										}
+									}
+									catch( Exception ex )
+									{
+										SoapUI.logError( ex, "Error processing state change to " + newState );
 									}
 								}
+							}
 						} );
 				Group jfxComponentGroup = new Group();
 				Scene scene = new Scene( jfxComponentGroup );
@@ -249,7 +247,7 @@ public class WebViewBasedBrowserComponent
 			public void run()
 			{
 
-				getWebEngine().loadContent( contentAsString, removeCharsetFrom(contentType));
+				getWebEngine().loadContent( contentAsString, removeCharsetFrom( contentType ) );
 			}
 		} );
 	}
@@ -257,7 +255,7 @@ public class WebViewBasedBrowserComponent
 	private String removeCharsetFrom( String contentType )
 	{
 		Matcher matcher = charsetFinderPattern.matcher( contentType );
-		return matcher.matches() ? matcher.group(1) : contentType;
+		return matcher.matches() ? matcher.group( 1 ) : contentType;
 	}
 
 	public void setContent( final String contentAsString )

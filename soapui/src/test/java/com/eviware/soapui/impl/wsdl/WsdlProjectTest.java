@@ -1,14 +1,11 @@
 package com.eviware.soapui.impl.wsdl;
 
 import com.eviware.soapui.SoapUI;
-import com.eviware.soapui.config.RESTMockResponseConfig;
 import com.eviware.soapui.impl.rest.RestRequest;
-
-import static com.eviware.soapui.impl.rest.RestRequestInterface.RequestMethod.*;
-
 import com.eviware.soapui.impl.rest.mock.RestMockAction;
 import com.eviware.soapui.impl.rest.mock.RestMockResponse;
 import com.eviware.soapui.impl.rest.mock.RestMockService;
+import com.eviware.soapui.model.mock.MockService;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.utils.ModelItemFactory;
 import org.junit.Before;
@@ -16,8 +13,11 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static com.eviware.soapui.impl.rest.HttpMethod.GET;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class WsdlProjectTest
 {
@@ -49,7 +49,6 @@ public class WsdlProjectTest
 	@Test
 	public void shouldSaveAndReloadRestMockResponses() throws Exception
 	{
-
 		addRestMockResponseToProject();
 
 		WsdlProject reloadedProject = saveAndReloadProject( project );
@@ -61,6 +60,30 @@ public class WsdlProjectTest
 		assertThat( reloadedMockResponse.getResponseContent(), is( restMockResponseContent ) );
 	}
 
+	@Test
+	public void shouldRemoveMockServices() throws Exception
+	{
+		int mockServiceCountBefore = project.getMockServiceCount();
+		MockService mocka = project.addNewMockService( "Mocka" );
+		assertThat( project.getMockServiceCount(), is( mockServiceCountBefore + 1 ) );
+
+		project.removeMockService( mocka );
+		assertThat( project.getMockServiceCount(), is( mockServiceCountBefore ) );
+		assertThat( project.getMockServiceByName( "Mocka" ), nullValue() );
+	}
+
+	@Test
+	public void shouldRemoveRestMockServices() throws Exception
+	{
+		int restMockServiceCountBefore = project.getRestMockServiceCount();
+		MockService mocka = project.addNewRestMockService( "Mocka" );
+		assertThat( project.getRestMockServiceCount(), is( restMockServiceCountBefore + 1 ) );
+
+		project.removeMockService( mocka );
+		assertThat( project.getRestMockServiceCount(), is( restMockServiceCountBefore ) );
+		assertThat( project.getRestMockServiceByName( "Mocka" ), nullValue() );
+	}
+
 	private void addRestMockResponseToProject() throws SoapUIException
 	{
 		RestMockService restMockService = project.addNewRestMockService( restMockServiceName );
@@ -69,8 +92,7 @@ public class WsdlProjectTest
 		restRequest.setName( "REST Mock Action" );
 		restRequest.setPath( "Resource/path/subpath" );
 		RestMockAction restMockAction = restMockService.addNewMockAction( restRequest );
-		RESTMockResponseConfig responseConfig = restMockAction.getConfig().addNewResponse();
-		RestMockResponse mockResponse = restMockAction.addNewMockResponse( responseConfig );
+		RestMockResponse mockResponse = restMockAction.addNewMockResponse( "Response 1" );
 		mockResponse.setResponseContent( restMockResponseContent );
 		mockResponse.setName( restMockResponseName );
 	}

@@ -90,6 +90,20 @@ public class HttpHtmlMessageExchangeResponseView extends AbstractXmlEditorView<H
 
 	private Component buildContent()
 	{
+		JPanel contentPanel = new JPanel( new BorderLayout() );
+		if( SoapUI.isBrowserDisabled() )
+		{
+			contentPanel.add( new JLabel( "Browser Component is disabled" ) );
+		}
+		else
+		{
+			browser = new WebViewBasedBrowserComponent( false );
+			Component component = browser.getComponent();
+			component.setMinimumSize( new Dimension( 100, 100 ) );
+			contentPanel.add( new JScrollPane( component ) );
+
+			setEditorContent( messageExchangeModelItem );
+		}
 		return contentPanel;
 	}
 

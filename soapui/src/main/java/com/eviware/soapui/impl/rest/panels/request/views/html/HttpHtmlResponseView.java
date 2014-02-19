@@ -24,15 +24,13 @@ import com.eviware.soapui.support.editor.EditorLocation;
 import com.eviware.soapui.support.editor.views.AbstractXmlEditorView;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings( "unchecked" )
+@SuppressWarnings("unchecked")
 public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocument> implements PropertyChangeListener
 {
 	public static final String CHARSET_PATTERN = "(.+)(;\\s*charset=)(.+)";
@@ -41,6 +39,7 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 	private WebViewBasedBrowserComponent browser;
 	private MessageExchangeModelItem messageExchangeModelItem;
 	private Pattern charsetFinderPattern = Pattern.compile( CHARSET_PATTERN );
+	private boolean initialized = false;
 
 	public HttpHtmlResponseView( HttpResponseMessageEditor httpRequestMessageEditor, HttpRequestInterface<?> httpRequest )
 	{
@@ -58,16 +57,21 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 	public boolean activate( EditorLocation<HttpResponseDocument> location )
 	{
 		boolean activated = super.activate( location );
-		if (activated)
+		if( activated && !initialized )
 		{
 			if( browser == null )
-			{
-				browser = new WebViewBasedBrowserComponent( false );
-				Component component = browser.getComponent();
-				component.setMinimumSize( new Dimension( 100, 100 ) );
-				panel.add( component, BorderLayout.CENTER );
-			}
-
+				if( SoapUI.isBrowserDisabled() )
+				{
+					panel.add( new JLabel( "Browser Component is disabled" ) );
+				}
+				else
+				{
+					browser = new WebViewBasedBrowserComponent( false );
+					Component component = browser.getComponent();
+					component.setMinimumSize( new Dimension( 100, 100 ) );
+					panel.add( component, BorderLayout.CENTER );
+				}
+			initialized = true;
 			HttpResponse response = httpRequest.getResponse();
 			if( response != null )
 			{
@@ -87,7 +91,7 @@ public class HttpHtmlResponseView extends AbstractXmlEditorView<HttpResponseDocu
 		}
 		return deactivated;
 	}
-	
+
 	@Override
 	public void release()
 	{

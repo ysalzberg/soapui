@@ -12,9 +12,8 @@
 
 package com.eviware.soapui.impl.rest.actions.oauth;
 
-import com.eviware.soapui.support.UISupport;
+import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.support.components.WebViewBasedBrowserComponent;
-import javafx.application.Platform;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -33,6 +32,7 @@ public class WebViewUserBrowserFacade implements UserBrowserFacade
 	public void open( URL url )
 	{
 		popupWindow = new JFrame( "Browser" );
+        popupWindow.setIconImages(SoapUI.getFrameIcons());
 
 		popupWindow.getContentPane().add( browserComponent.getComponent() );
 		popupWindow.setBounds( 100, 100, 800, 600 );
@@ -71,35 +71,23 @@ public class WebViewUserBrowserFacade implements UserBrowserFacade
 	@Override
 	public void close()
 	{
-		//FIXME: Find out what the problem is with closing the popup on Mac!
-		if( UISupport.isMac() )
+
+		try
 		{
-			return;
-		}
-		Platform.runLater( new Runnable()
-		{
-			@Override
-			public void run()
+			SwingUtilities.invokeLater( new Runnable()
 			{
-				browserComponent.webView.getEngine().load( null );
-				try
+				@Override
+				public void run()
 				{
-					SwingUtilities.invokeAndWait( new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							popupWindow.setVisible( false );
-							popupWindow.dispose();
-						}
-					} );
+					popupWindow.setVisible( false );
+					popupWindow.dispose();
 				}
-				catch( Exception ignore )
-				{
-					  ignore.printStackTrace();
-				}
-			}
-		} );
+			} );
+		}
+		catch( Exception e )
+		{
+			SoapUI.log.debug( "Could not close window due to unexpected error: " + e.getMessage() + "!" );
+		}
 
 	}
 
