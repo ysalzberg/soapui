@@ -12,7 +12,12 @@
 
 package com.eviware.soapui.impl.rest;
 
-import com.eviware.soapui.config.*;
+import com.eviware.soapui.config.AccessTokenPositionConfig;
+import com.eviware.soapui.config.AccessTokenStatusConfig;
+import com.eviware.soapui.config.OAuth2FlowConfig;
+import com.eviware.soapui.config.OAuth2ProfileConfig;
+import com.eviware.soapui.config.RefreshAccessTokenMethodConfig;
+import com.eviware.soapui.config.StringListConfig;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansion;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionContainer;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpansionsResult;
@@ -20,8 +25,9 @@ import org.apache.commons.lang.StringUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
-import static com.eviware.soapui.impl.rest.OAuth2Profile.RefreshAccessTokenMethods.AUTOMATIC;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 /**
  * Encapsulates values associated with an Oauth2 flow. Mostly they will be input by users, but the "accessToken" and
  * "status" properties will be modified during the OAuth2 interactions.
@@ -41,8 +47,10 @@ public class OAuth2Profile implements PropertyExpansionContainer
 	public static final String ACCESS_TOKEN_POSITION_PROPERTY = "accessTokenPosition";
 	public static final String ACCESS_TOKEN_EXPIRATION_TIME = "accessTokenExpirationTime";
 	public static final String ACCESS_TOKEN_ISSUED_TIME = "accessTokenIssuedTime";
-	public static final String OAUTH2_FLOW = "oAuth2Flow";
 	public static final String REFRESH_ACCESS_TOKEN_METHOD_PROPERTY = "refreshAccessTokenMethod";
+	public static final String OAUTH2_FLOW_PROPERTY = "oAuth2Flow";
+	public static final String JAVA_SCRIPTS_PROPERTY = "javaScripts";
+
 
 	public enum AccessTokenStatus
 	{
@@ -96,7 +104,7 @@ public class OAuth2Profile implements PropertyExpansionContainer
 	public enum RefreshAccessTokenMethods
 	{
 		AUTOMATIC,
-		MANUAL;
+		MANUAL
 	}
 
 	private final OAuth2ProfileContainer oAuth2ProfileContainer;
@@ -108,6 +116,13 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		this.oAuth2ProfileContainer = oAuth2ProfileContainer;
 		this.configuration = configuration;
 		pcs = new PropertyChangeSupport( this );
+	}
+
+
+	public boolean hasAutomationJavaScripts()
+	{
+		List<String> javaScripts = getAutomationJavaScripts();
+		return javaScripts != null && !javaScripts.isEmpty();
 	}
 
 	public void waitingForAuthorization()
@@ -178,7 +193,7 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		if( !oauth2Flow.equals( existingFlow ) )
 		{
 			configuration.setOAuth2Flow( OAuth2FlowConfig.Enum.forString( oauth2Flow.name() ) );
-			pcs.firePropertyChange( OAUTH2_FLOW, existingFlow, oauth2Flow );
+			pcs.firePropertyChange( OAUTH2_FLOW_PROPERTY, existingFlow, oauth2Flow );
 		}
 	}
 
@@ -374,9 +389,10 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		}
 	}
 
-	public boolean shouldRefreshAccessTokenAutomatically()
+	public boolean shouldReloadAccessTokenAutomatically()
 	{
-		return getRefreshAccessTokenMethod().equals( AUTOMATIC ) && (!StringUtils.isEmpty( getRefreshToken() ));
+		return getRefreshAccessTokenMethod() == RefreshAccessTokenMethods.AUTOMATIC  &&
+				(hasAutomationJavaScripts() || (!StringUtils.isEmpty( getRefreshToken() )));
 	}
 
 	public OAuth2ProfileContainer getContainer()
@@ -398,6 +414,27 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		result.extractAndAddAll( SCOPE_PROPERTY );
 
 		return result.toArray();
+	}
+
+	public List<String> getAutomationJavaScripts()
+	{
+		StringListConfig configurationEntry = configuration.getJavaScripts();
+		return configurationEntry == null ? Collections.<String>emptyList() :  new ArrayList<String>(
+				configurationEntry.getEntryList());
+	}
+
+	public void setAutomationJavaScripts( List<String> javaScripts )
+	{
+		List<String> oldScripts = getAutomationJavaScripts();
+		String[] scriptArray = javaScripts.toArray( new String[javaScripts.size()] );
+		StringListConfig javaScriptsConfiguration = configuration.getJavaScripts();
+		if( javaScriptsConfiguration == null )
+		{
+			javaScriptsConfiguration = StringListConfig.Factory.newInstance();
+		}
+		javaScriptsConfiguration.setEntryArray( scriptArray );
+		configuration.setJavaScripts( javaScriptsConfiguration );
+		pcs.firePropertyChange( JAVA_SCRIPTS_PROPERTY, oldScripts, javaScripts );
 	}
 
 	public void addPropertyChangeListener( PropertyChangeListener listener )
