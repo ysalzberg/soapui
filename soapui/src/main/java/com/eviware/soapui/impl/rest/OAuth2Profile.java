@@ -28,6 +28,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 /**
  * Encapsulates values associated with an Oauth2 flow. Mostly they will be input by users, but the "accessToken" and
  * "status" properties will be modified during the OAuth2 interactions.
@@ -51,6 +52,26 @@ public class OAuth2Profile implements PropertyExpansionContainer
 	public static final String OAUTH2_FLOW_PROPERTY = "oAuth2Flow";
 	public static final String JAVA_SCRIPTS_PROPERTY = "javaScripts";
 
+	public void waitForAccessTokenStatus( AccessTokenStatus accessTokenStatus, int timeout )
+	{
+		int timeLeft = timeout;
+		while( !String.valueOf( getAccessTokenStatus() ).equals( accessTokenStatus.toString() ) && timeLeft > 0 )
+		{
+			long startTime = System.currentTimeMillis();
+			try
+			{
+				synchronized( this )
+				{
+					wait( timeLeft );
+				}
+			}
+			catch( InterruptedException ignore )
+			{
+
+			}
+			timeLeft -= ( System.currentTimeMillis() - startTime );
+		}
+	}
 
 	public enum AccessTokenStatus
 	{
@@ -332,7 +353,7 @@ public class OAuth2Profile implements PropertyExpansionContainer
 	{
 		if( configuration.getAccessTokenStatus() != null )
 		{
-			return AccessTokenStatus.valueOf( configuration.getAccessTokenStatus().toString()).toString();
+			return AccessTokenStatus.valueOf( configuration.getAccessTokenStatus().toString() ).toString();
 		}
 		return null;
 	}
@@ -371,7 +392,7 @@ public class OAuth2Profile implements PropertyExpansionContainer
 
 	public RefreshAccessTokenMethods getRefreshAccessTokenMethod()
 	{
-		if( configuration.getRefreshAccessTokenMethod() ==null)
+		if( configuration.getRefreshAccessTokenMethod() == null )
 		{
 			configuration.setRefreshAccessTokenMethod( RefreshAccessTokenMethodConfig.Enum
 					.forString( RefreshAccessTokenMethods.AUTOMATIC.toString() ) );
@@ -391,8 +412,8 @@ public class OAuth2Profile implements PropertyExpansionContainer
 
 	public boolean shouldReloadAccessTokenAutomatically()
 	{
-		return getRefreshAccessTokenMethod() == RefreshAccessTokenMethods.AUTOMATIC  &&
-				(hasAutomationJavaScripts() || (!StringUtils.isEmpty( getRefreshToken() )));
+		return getRefreshAccessTokenMethod() == RefreshAccessTokenMethods.AUTOMATIC &&
+				( hasAutomationJavaScripts() || ( !StringUtils.isEmpty( getRefreshToken() ) ) );
 	}
 
 	public OAuth2ProfileContainer getContainer()
@@ -481,7 +502,11 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		{
 			configuration.setAccessTokenStatus( null );
 		}
-		String oldValueAsString = oldValue==null ? null : oldValue.toString();
+		synchronized( this )
+		{
+			notifyAll();
+		}
+		String oldValueAsString = oldValue == null ? null : oldValue.toString();
 		pcs.firePropertyChange( ACCESS_TOKEN_STATUS_PROPERTY, oldValueAsString, status.toString() );
 	}
 
