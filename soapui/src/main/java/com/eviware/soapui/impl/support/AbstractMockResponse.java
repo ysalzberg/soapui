@@ -7,10 +7,7 @@ import com.eviware.soapui.config.HeaderConfig;
 import com.eviware.soapui.impl.wsdl.AbstractWsdlModelItem;
 import com.eviware.soapui.impl.wsdl.MutableWsdlAttachmentContainer;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
-import com.eviware.soapui.impl.wsdl.mock.DispatchException;
-import com.eviware.soapui.impl.wsdl.mock.WsdlMockOperation;
-import com.eviware.soapui.impl.wsdl.mock.WsdlMockRequest;
-import com.eviware.soapui.impl.wsdl.mock.WsdlMockRunContext;
+import com.eviware.soapui.impl.wsdl.mock.*;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.attachments.AttachmentUtils;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.attachments.MimeMessageMockResponseEntity;
 import com.eviware.soapui.impl.wsdl.submit.transports.http.support.attachments.MockResponseDataSource;
@@ -125,6 +122,7 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 
 		return result;
 	}
+
 
 	public void setResponseHttpStatus( int httpStatus )
 	{
@@ -274,7 +272,7 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 		}
 	}
 
-	protected String writeResponse( MockResult response, String responseContent ) throws Exception
+	protected String writeResponse( MockResult result, String responseContent ) throws Exception
 	{
 		MimeMultipart mp = null;
 
@@ -322,7 +320,7 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 			responseContent = XmlUtils.stripWhitespaces( responseContent );
 		}
 
-		MockRequest request = response.getMockRequest();
+		MockRequest request = result.getMockRequest();
 		request.getHttpResponse().setStatus( this.getResponseHttpStatus() );
 
 		ByteArrayOutputStream outData = new ByteArrayOutputStream();
@@ -337,22 +335,22 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 
 			byte[] content = encoding == null ? responseContent.getBytes() : responseContent.getBytes( encoding );
 
-			if( !response.getResponseHeaders().containsKeyIgnoreCase( "Content-Type" ) )
+			if( !result.getResponseHeaders().containsKeyIgnoreCase( "Content-Type" ) )
 			{
-				response.setContentType( getContentType( operation, encoding ) );
+				result.setContentType( getContentType( operation, encoding ) );
 			}
 
-			String acceptEncoding = response.getMockRequest().getRequestHeaders().get( "Accept-Encoding", "" );
+			String acceptEncoding = result.getMockRequest().getRequestHeaders().get( "Accept-Encoding", "" );
 			if( AUTO_RESPONSE_COMPRESSION.equals( responseCompression ) && acceptEncoding != null
 					&& acceptEncoding.toUpperCase().contains( "GZIP" ) )
 			{
-				response.addHeader( "Content-Encoding", "gzip" );
+				result.addHeader( "Content-Encoding", "gzip" );
 				outData.write( CompressionSupport.compress( CompressionSupport.ALG_GZIP, content ) );
 			}
 			else if( AUTO_RESPONSE_COMPRESSION.equals( responseCompression ) && acceptEncoding != null
 					&& acceptEncoding.toUpperCase().contains( "DEFLATE" ) )
 			{
-				response.addHeader( "Content-Encoding", "deflate" );
+				result.addHeader( "Content-Encoding", "deflate" );
 				outData.write( CompressionSupport.compress( CompressionSupport.ALG_DEFLATE, content ) );
 			}
 			else
@@ -379,8 +377,8 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 			MimeMessageMockResponseEntity mimeMessageRequestEntity
 					= new MimeMessageMockResponseEntity( message, isXOP, this );
 
-			response.addHeader( "Content-Type", mimeMessageRequestEntity.getContentType().getValue() );
-			response.addHeader( "MIME-Version", "1.0" );
+			result.addHeader( "Content-Type", mimeMessageRequestEntity.getContentType().getValue() );
+			result.addHeader( "MIME-Version", "1.0" );
 			mimeMessageRequestEntity.writeTo( outData );
 		}
 
@@ -391,11 +389,11 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 			if( responseCompression.equals( CompressionSupport.ALG_DEFLATE )
 					|| responseCompression.equals( CompressionSupport.ALG_GZIP ) )
 			{
-				response.addHeader( "Content-Encoding", responseCompression );
+				result.addHeader( "Content-Encoding", responseCompression );
 				data = CompressionSupport.compress( responseCompression, data );
 			}
 
-			response.writeRawResponseData( data );
+			result.writeRawResponseData( data );
 		}
 
 		return responseContent;
@@ -414,6 +412,25 @@ public abstract class AbstractMockResponse<MockResponseConfigType extends BaseMo
 	}
 
 	protected abstract String removeEmptyContent( String responseContent );
+
+	public void setResponseHeaders( StringToStringsMap headers )
+	{
+		StringToStringsMap oldHeaders = getResponseHeaders();
+
+		getConfig().setHeaderArray( new HeaderConfig[0] );
+
+		for( Map.Entry<String, List<String>> header : headers.entrySet() )
+		{
+			for( String value : header.getValue() )
+			{
+				HeaderConfig headerConfig = getConfig().addNewHeader();
+				headerConfig.setName( header.getKey() );
+				headerConfig.setValue( value );
+			}
+		}
+
+		notifyPropertyChanged( WsdlMockResponse.HEADERS_PROPERTY, oldHeaders, headers );
+	}
 
 	protected abstract String executeSpecifics( MockRequest request, String responseContent, WsdlMockRunContext context ) throws IOException, WSSecurityException;
 

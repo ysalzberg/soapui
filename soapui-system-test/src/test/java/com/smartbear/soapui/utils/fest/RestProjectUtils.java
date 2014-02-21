@@ -37,9 +37,9 @@ public final class RestProjectUtils
 	private static final String NEW_REST_PROJECT_DIALOG_NAME = "New REST Project";
 	private static final String OK_BUTTON_NAME = "OK";
 
-	private static final int REST_RESOURCE_POSITION_IN_TREE = 3;
-	private static final int REST_REQUEST_POSITION_IN_TREE = 5;
-	private static final int REST_METHOD_POSITION_IN_TREE = 4;
+	private static final int REST_RESOURCE_POSITION_IN_TREE = 2;
+	private static final int REST_REQUEST_POSITION_IN_TREE = 4;
+	private static final int REST_METHOD_POSITION_IN_TREE = 3;
 
 
 	private RestProjectUtils()
@@ -159,7 +159,7 @@ public final class RestProjectUtils
 		robot.waitForIdle();
 		JTextField tableCellEditor = ( JTextField )table.cell( row( row ).column( column ) ).editor();
 		new JTextComponentFixture( robot, tableCellEditor )
-				.enterText( paramValue )
+				.setText( paramValue )
 				.pressAndReleaseKey( KeyPressInfo.keyCode( KeyEvent.VK_ENTER ) );
 	}
 }
