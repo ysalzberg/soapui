@@ -76,7 +76,7 @@ public class OAuth2RequestFilterTest
 	{
 		String expectedAccessTokenValue = "Bearer " + ACCESS_TOKEN;
 		oAuth2RequestFilter.filterRestRequest( mockContext, restRequest );
-		assertThat( httpRequest.getHeaders( OAuth.HeaderType.AUTHORIZATION )[0].getValue(), is( expectedAccessTokenValue ) );
+		assertThat( httpRequest.getHeaders( OAuth.HeaderType.AUTHORIZATION )[0].getValue(), is( expectedAccessTokenValue ) ) ;
 	}
 
 	@Test

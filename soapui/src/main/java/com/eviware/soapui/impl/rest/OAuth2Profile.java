@@ -69,8 +69,9 @@ public class OAuth2Profile implements PropertyExpansionContainer
 			{
 
 			}
-			timeLeft -= ( System.currentTimeMillis() - startTime );
+			timeLeft -= (System.currentTimeMillis() - startTime);
 		}
+
 	}
 
 	public enum AccessTokenStatus
@@ -440,8 +441,8 @@ public class OAuth2Profile implements PropertyExpansionContainer
 	public List<String> getAutomationJavaScripts()
 	{
 		StringListConfig configurationEntry = configuration.getJavaScripts();
-		return configurationEntry == null ? Collections.<String>emptyList() :  new ArrayList<String>(
-				configurationEntry.getEntryList());
+		return configurationEntry == null ? Collections.<String>emptyList() : new ArrayList<String>(
+				configurationEntry.getEntryList() );
 	}
 
 	public void setAutomationJavaScripts( List<String> javaScripts )
@@ -490,17 +491,23 @@ public class OAuth2Profile implements PropertyExpansionContainer
 		{
 			return;
 		}
-		else if( status != null )
+
+		synchronized( this )
 		{
-			if( status.equals( oldValue ) )
+			if( status != null )
 			{
-				return;
+				if( status.equals( oldValue ) )
+				{
+					return;
+				}
+				configuration.setAccessTokenStatus( AccessTokenStatusConfig.Enum.forString( status.name() ) );
 			}
-			configuration.setAccessTokenStatus( AccessTokenStatusConfig.Enum.forString( status.name() ) );
-		}
-		else
-		{
-			configuration.setAccessTokenStatus( null );
+
+			else
+			{
+				configuration.setAccessTokenStatus( null );
+			}
+			notifyAll();
 		}
 		synchronized( this )
 		{
