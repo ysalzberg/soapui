@@ -2,13 +2,18 @@ package com.eviware.soapui.impl.rest.panels.mock;
 
 import com.eviware.soapui.SoapUI;
 import com.eviware.soapui.impl.rest.mock.RestMockResponse;
+import com.eviware.soapui.impl.wsdl.panels.mockoperation.MockResponseXmlDocument;
 import com.eviware.soapui.model.mock.MockResponse;
+import com.eviware.soapui.support.MediaTypeComboBox;
 import com.eviware.soapui.support.editor.inspectors.httpheaders.HttpHeadersInspector;
 import com.eviware.soapui.support.editor.inspectors.httpheaders.MockResponseHeadersModel;
 import com.eviware.soapui.ui.support.AbstractMockResponseDesktopPanel;
 import org.apache.commons.httpclient.HttpStatus;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Field;
@@ -25,39 +30,82 @@ public class RestMockResponseDesktopPanel extends
 		init( mockResponse );
 	}
 
-	public JComponent addTopEditorPanel( )
+	public JComponent addTopEditorPanel()
 	{
-		JPanel topEditorPanel = new JPanel( );
+		JPanel topEditorPanel = new JPanel();
 		topEditorPanel.setLayout( new BoxLayout( topEditorPanel, BoxLayout.Y_AXIS ) );
 
 		topEditorPanel.add( createLabelPanel() );
 		topEditorPanel.add( createHeaderInspector() );
 		topEditorPanel.add( Box.createVerticalStrut( 5 ) );
 		topEditorPanel.add( createHttpStatusPanel() );
+		topEditorPanel.add( Box.createVerticalStrut( 5 ) );
+		topEditorPanel.add( createMediaTypeCombo() );
+
 
 		return topEditorPanel;
 	}
 
-	private JPanel createLabelPanel()
+	private JComponent createLabelPanel()
 	{
-		JPanel labelPanel = new JPanel(  );
-		labelPanel.setLayout( new BoxLayout( labelPanel, BoxLayout.X_AXIS ) );
-
-		labelPanel.add( new JLabel( "Headers:" ) );
-		labelPanel.add( Box.createHorizontalGlue() );
-
-		return labelPanel;
+		return createPanelWithLabel( "Headers: ", Box.createHorizontalGlue() );
 	}
 
 	private JComponent createHttpStatusPanel()
 	{
-		JPanel httpStatusPanel = new JPanel(  );
-		httpStatusPanel.setLayout( new BoxLayout(httpStatusPanel, BoxLayout.X_AXIS ) );
+		return createPanelWithLabel( "Http Status Code: ", createStatusCodeCombo() );
+	}
 
-		httpStatusPanel.add( new JLabel( "Http Status Code: " ) );
-		httpStatusPanel.add( createStatusCodeCombo() );
+	protected MockResponseMessageEditor buildResponseEditor()
+	{
+		MockResponseXmlDocument documentContent = new MockResponseXmlDocument( getMockResponse() );
+		MockResponseMessageEditor mockResponseMessageEditor = new MockResponseMessageEditor( documentContent );
+		setMediaType( mockResponseMessageEditor.getInputArea(), getModelItem().getMediaType() );
+		return mockResponseMessageEditor;
+	}
 
-		return httpStatusPanel;
+	public void setMediaType( RSyntaxTextArea inputArea, String mediaType )
+	{
+		if( mediaType.contains( "json" ) )
+		{
+			inputArea.setSyntaxEditingStyle( SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT );
+		}
+		else if( mediaType.contains( "xml" ) )
+		{
+			inputArea.setSyntaxEditingStyle( SyntaxConstants.SYNTAX_STYLE_XML );
+		}
+		else
+		{
+			inputArea.setSyntaxEditingStyle( SyntaxConstants.SYNTAX_STYLE_NONE );
+		}
+
+	}
+
+
+	private JComponent createMediaTypeCombo()
+	{
+		MediaTypeComboBox mediaTypeComboBox = new MediaTypeComboBox( this.getModelItem() );
+		mediaTypeComboBox.addItemListener( new ItemListener()
+		{
+			@Override
+			public void itemStateChanged( ItemEvent e )
+			{
+				setMediaType( getResponseEditor().getInputArea(), e.getItem().toString() );
+			}
+		} );
+		return createPanelWithLabel( "Media type: ", mediaTypeComboBox );
+	}
+
+	private JComponent createPanelWithLabel( String labelText, Component rightSideComponent )
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ) );
+
+		panel.add( new JLabel( labelText ) );
+		panel.add( rightSideComponent );
+		panel.add( Box.createHorizontalGlue() );
+
+		return panel;
 	}
 
 	private JComboBox createStatusCodeCombo()
@@ -72,7 +120,7 @@ public class RestMockResponseDesktopPanel extends
 		{
 			public void itemStateChanged( ItemEvent e )
 			{
-				getModelItem().setResponseHttpStatus( (( CompleteHttpStatus )statusCodeCombo.getSelectedItem()).getStatusCode() );
+				getModelItem().setResponseHttpStatus( ( ( CompleteHttpStatus )statusCodeCombo.getSelectedItem() ).getStatusCode() );
 			}
 		} );
 		return statusCodeCombo;
@@ -83,8 +131,7 @@ public class RestMockResponseDesktopPanel extends
 		MockResponseHeadersModel model = new MockResponseHeadersModel( getModelItem() );
 		HttpHeadersInspector inspector = new HttpHeadersInspector( model );
 
-		boolean shouldShowOnlineHelpIcon = false;
-		JComponent component = inspector.getComponent( shouldShowOnlineHelpIcon );
+		JComponent component = inspector.getComponent();
 		return component;
 	}
 
@@ -114,13 +161,13 @@ class CompleteHttpStatus
 	@Override
 	public String toString()
 	{
-	   return "" + statusCode + " - " + description;
+		return "" + statusCode + " - " + description;
 	}
 
 	@Override
-	public boolean equals(Object object)
+	public boolean equals( Object object )
 	{
-		return ((CompleteHttpStatus)object).statusCode == statusCode;
+		return ( ( CompleteHttpStatus )object ).statusCode == statusCode;
 
 	}
 }
