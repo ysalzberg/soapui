@@ -13,7 +13,7 @@
 package com.eviware.soapui.support.components;
 
 import com.eviware.soapui.SoapUI;
-import com.eviware.soapui.impl.rest.actions.oauth.BrowserStateChangeListener;
+import com.eviware.soapui.impl.rest.actions.oauth.BrowserListener;
 import com.eviware.soapui.support.xml.XmlUtils;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -52,9 +52,10 @@ public class WebViewBasedBrowserComponent
 	public String url;
 	private PropertyChangeSupport pcs = new PropertyChangeSupport( this );
 
-	private java.util.List<BrowserStateChangeListener> listeners = new ArrayList<BrowserStateChangeListener>();
+	private java.util.List<BrowserListener> listeners = new ArrayList<BrowserListener>();
 
 	public WebView webView;
+	private String lastLocation;
 	private WebViewNavigationBar navigationBar;
 
 	public WebViewBasedBrowserComponent( boolean addNavigationBar )
@@ -99,7 +100,8 @@ public class WebViewBasedBrowserComponent
 					public void changed( ObservableValue<? extends String> observableValue, String oldLocation,
 												String newLocation )
 					{
-						for( BrowserStateChangeListener listener : listeners )
+						lastLocation = newLocation;
+						for( BrowserListener listener : listeners )
 						{
 							listener.locationChanged( newLocation );
 						}
@@ -119,7 +121,7 @@ public class WebViewBasedBrowserComponent
 										if( getWebEngine().getDocument() != null )
 										{
 											String output = readDocumentAsString();
-											for( BrowserStateChangeListener listener : listeners )
+											for( BrowserListener listener : listeners )
 											{
 												listener.contentChanged( output );
 											}
@@ -184,6 +186,37 @@ public class WebViewBasedBrowserComponent
 			}
 		}
 		);
+	}
+
+	public void executeJavaScript( final String script )
+	{
+		Platform.runLater( new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					Object result = webView.getEngine().executeScript( script );
+					System.out.println(result);
+				}
+				catch( Exception e )
+				{
+					SoapUI.log.warn("Error executing JavaScript [" + script + "]", e );
+					for( BrowserListener listener : listeners )
+					{
+						listener.javaScriptErrorOccurred( script, lastLocation, e );
+					}
+				}
+			}
+		} );
+	}
+
+	public void handleClose()
+	{
+		for( BrowserListener listener : listeners )
+		{
+			listener.browserClosed();
+		}
 	}
 
 	public void release()
@@ -298,12 +331,12 @@ public class WebViewBasedBrowserComponent
 			showingErrorPage = false;
 	}
 
-	public void addBrowserStateListener( BrowserStateChangeListener listener )
+	public void addBrowserStateListener( BrowserListener listener )
 	{
 		listeners.add( listener );
 	}
 
-	public void removeBrowserStateListener( BrowserStateChangeListener listener )
+	public void removeBrowserStateListener( BrowserListener listener )
 	{
 		listeners.remove( listener );
 	}
