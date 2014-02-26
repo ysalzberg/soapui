@@ -45,6 +45,8 @@ import java.awt.HeadlessException;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.StringWriter;
@@ -325,6 +327,14 @@ public class WebViewBasedBrowserComponent
 			browser = new WebViewBasedBrowserComponent( popupFeatures.hasToolbar() );
 			getContentPane().setLayout( new BorderLayout() );
 			getContentPane().add( browser.getComponent() );
+			addWindowListener( new WindowAdapter()
+			{
+				@Override
+				public void windowClosing( WindowEvent e )
+				{
+					browser.handleClose();
+				}
+			} );
 		}
 
 		public void close()
